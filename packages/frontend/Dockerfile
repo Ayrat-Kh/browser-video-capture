@@ -20,8 +20,9 @@ COPY ./packages/frontend/vite.config.ts ./packages/frontend/vite.config.ts
 COPY ./packages/common/src ./packages/common/src
 
 ARG ENV_MODE
-RUN echo "Mode: $ENV_MODE"
 
+COPY ./packages/frontend/.env.$ENV_MODE ./packages/frontend/.env.$ENV_MODE
+RUN echo "Mode: $ENV_MODE"
 RUN yarn build:frontend --mode $ENV_MODE
 
 # Runtime (production) layer
