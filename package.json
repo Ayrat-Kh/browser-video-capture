@@ -8,6 +8,7 @@
     "dev": "vite",
     "build:backend": "yarn workspace @webcam/backend build",
     "build:frontend": "yarn workspace @webcam/frontend build",
-    "build:docker:backend": "docker build --no-cache -t 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam -f ./packages/backend/Dockerfile ."
+    "build:docker:backend": "docker build --no-cache -t 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam -f ./packages/backend/Dockerfile .",
+    "build:docker:frontend": "docker build --no-cache -t 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam -f ./packages/backend/Dockerfile ."
   }
 }
