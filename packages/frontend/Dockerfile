@@ -29,7 +29,7 @@ FROM nginx:stable-alpine as production
 
 WORKDIR /app
 
-COPY --from=development /app/packages/frontend/dist/ /usr/share/nginx/html/
+COPY --from=development /app/packages/frontend/dist /usr/share/nginx/html
 COPY ./packages/frontend/nginx/default.conf /etc/nginx/conf.d/default.conf
 
 # Expose application port
