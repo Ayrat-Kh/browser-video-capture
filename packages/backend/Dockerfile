@@ -34,6 +34,8 @@ COPY ./yarn.lock ./
 # Install runtime dependecies (without dev/test dependecies)
 RUN yarn --production=true
 
+ARG ENV_FILE
+
 RUN echo "ENV file: $ENV_FILE"
 
 COPY ./packages/backend/$ENV_FILE ./.env
