@@ -13,8 +13,8 @@ COPY ./yarn.lock ./
 # Install dependencies
 RUN yarn
 
-COPY ./packages/backend/src/* ./packages/backend/src/
-COPY ./packages/common/src/* ./packages/common/src/
+COPY ./packages/backend/src ./packages/backend/src
+COPY ./packages/common/src ./packages/common/src
 
 # Build application (produces dist/ folder)
 
