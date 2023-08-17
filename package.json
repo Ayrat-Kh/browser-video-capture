@@ -6,7 +6,7 @@
   ],
   "scripts": {
     "build:frontend": "yarn workspace @webcam/frontend build",
-    "build:docker:frontend:staging": "docker build --build-arg ENV_MODE=staging -t 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam/frontend -f ./packages/frontend/Dockerfile .",
+    "build:docker:frontend:staging": "docker build --build-arg ENV_MODE=staging -t 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend -f ./packages/frontend/Dockerfile .",
     "---------------- backend------------": "",
     "build:backend": "yarn workspace @webcam/backend build",
     "build:docker:backend:staging": "docker build --build-arg ENV_FILE=.env.staging -t 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam/backend -f ./packages/backend/Dockerfile ."
