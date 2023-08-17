@@ -19,8 +19,10 @@ COPY ./packages/frontend/index.html ./packages/frontend/index.html
 COPY ./packages/frontend/vite.config.ts ./packages/frontend/vite.config.ts
 COPY ./packages/common/src ./packages/common/src
 
-# Build application (produces dist/ folder)
-RUN yarn build:frontend
+RUN echo "Mode: $ENV_MODE"
+
+
+RUN yarn build:frontend --mode $ENV_MODE
 
 # Runtime (production) layer
 FROM nginx:stable-alpine as production
@@ -40,4 +42,4 @@ COPY --from=development /app/packages/backend/dist/ ./dist/
 EXPOSE 3000
 
 # Start application
-CMD [ "node", "dist/main.js" ]
+CMD ["nginx", "-g", "daemon off;"]

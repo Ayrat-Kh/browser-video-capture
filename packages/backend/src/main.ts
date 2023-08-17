@@ -6,6 +6,8 @@ async function bootstrap() {
     cors: true,
   });
 
+  console.log('ENVIRONMENT', process.env.ENVIRONMENT);
+
   await app.listen(3001);
 }
 bootstrap();

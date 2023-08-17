@@ -4,7 +4,6 @@ FROM node:16-alpine as development
 WORKDIR /app
 
 # Copy configuration files
-COPY ./packages/backend/tsconfig*.json ./packages/backend/
 COPY ./packages/backend/package.json ./packages/backend/
 COPY ./packages/common/package.json ./packages/common/
 COPY ./package.json ./
@@ -13,6 +12,7 @@ COPY ./yarn.lock ./
 # Install dependencies
 RUN yarn
 
+COPY ./packages/backend/tsconfig*.json ./packages/backend/
 COPY ./packages/backend/src ./packages/backend/src
 COPY ./packages/common/src ./packages/common/src
 
@@ -33,6 +33,8 @@ COPY ./yarn.lock ./
 
 # Install runtime dependecies (without dev/test dependecies)
 RUN yarn --production=true
+
+COPY ./packages/backend/$ENV_FILE ./.env
 
 # Copy production build
 COPY --from=development /app/packages/backend/dist/ ./dist/
