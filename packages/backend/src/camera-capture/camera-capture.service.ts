@@ -36,15 +36,10 @@ export class CameraCaptureService {
     },
   ): Promise<void> {
     if (data.isFirstChunk) {
-      // this.#resetFirstChunk(data.sensorId);
-
       this.#resetEncoder(data.sensorId);
     }
 
     const encoder = await this.#getEncoder(data.sensorId);
-    // console.log(
-    //   `Write chunk for ${data.sensorId}, length: ${data.chunk.byteLength}`,
-    // );
     encoder.ffmpegProc.stdin.write(data.chunk);
 
     return Promise.resolve();
@@ -103,8 +98,6 @@ export class CameraCaptureService {
 
   async #getEncoder(sensorId: string): Promise<Encoder> {
     if (!this.#encoders.has(sensorId)) {
-      // await this.#initSensorImageFolder(sensorId);
-
       const subPath = join(sensorId, new Date().getTime().toString());
       const path = join(
         this.configurationService.get('contentFolder'),
@@ -141,16 +134,19 @@ export class CameraCaptureService {
         { stdio: ['pipe'] },
       );
 
-      // flv stream
-      // ffmpegProcess.stdio[1].on('data', (chunk: Buffer) => {
-      //   this.#initFirstChunk(sensorId, chunk);
-      //   this.#pushFlvVideoChunk(sensorId, chunk);
-      // });
-
-      ffmpegProcess.stderr.on('data', (error: Buffer) => {
-        console.log('verb:', error.toString());
+      ffmpegProcess.on('close', (error: Buffer) => {
+        console.log('close:', error?.toString());
       });
 
+      ffmpegProcess.on('message', (error: Buffer) => {
+        console.log('message:', error.toString());
+      });
+
+      ffmpegProcess.on('error', (error: Buffer) => {
+        console.log('error:', error.toString());
+      });
+
+      console.log(`sensor: ${sensorId} path`, path);
       this.#encoders.set(sensorId, {
         ffmpegProc: ffmpegProcess,
         fwatcher,
@@ -189,12 +185,20 @@ export class CameraCaptureService {
         this.configurationService.get('contentFolder'),
         sensorId,
       );
-      const [latestFolder] = (await readdir(path))
+
+      console.log('path', path);
+
+      const folders = (await readdir(path))
         .map((x) => Number.parseFloat(x))
         .filter((x) => Number.isFinite(x))
         .sort((a, b) => b - a);
 
+      console.log('folders count', folders.length);
+      const [latestFolder] = folders;
+
       const lastUploadedFolder = join(path, `${latestFolder}`);
+
+      console.log('folders count', folders.length);
 
       const [latestFile] = (await readdir(lastUploadedFolder))
         .map((x) => ({ time: Number.parseFloat(x), name: x }))
@@ -206,6 +210,7 @@ export class CameraCaptureService {
         folder: lastUploadedFolder,
       };
     } catch (e) {
+      console.log('error opening file', e);
       return null;
     }
   }
