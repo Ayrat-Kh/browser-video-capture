@@ -4,7 +4,7 @@
   "description": "Nest TypeScript starter repository",
   "license": "MIT",
   "scripts": {
-    "build": "nest build && yarn run copy:assets",
+    "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
@@ -16,8 +16,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "dev": "yarn start:dev",
-    "copy:assets": "cpx 'src/public/**' 'dist/public'"
+    "dev": "yarn start:dev"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
