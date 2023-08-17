@@ -1,0 +1,10 @@
+{
+  "name": "webcam-analyzer",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "vite"
+  }
+}
