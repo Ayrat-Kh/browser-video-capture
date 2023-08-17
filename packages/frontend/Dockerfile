@@ -29,8 +29,8 @@ FROM nginx:stable-alpine as production
 
 WORKDIR /app
 
-COPY --from=builder /app/build /usr/share/nginx/html
-COPY nginx/default.conf /etc/nginx/conf.d/default.conf
+COPY --from=development /app/build /usr/share/nginx/html
+COPY ./packages/frontend/nginx/default.conf /etc/nginx/conf.d/default.conf
 
 # Install runtime dependecies (without dev/test dependecies)
 RUN yarn --production=true
