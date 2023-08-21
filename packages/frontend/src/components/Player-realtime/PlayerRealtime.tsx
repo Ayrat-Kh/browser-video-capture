@@ -6,8 +6,11 @@ import { CAMERA_RESOLUTION } from '@webcam/common';
 
 export const PlayerRealtime: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const playerRef = useRef<mpegts.Player | null>(null);
 
   const handlePlay = () => {
+    playerRef.current?.pause();
+
     if (mpegts.isSupported() && videoRef.current) {
       const player = mpegts.createPlayer(
         {
@@ -19,11 +22,14 @@ export const PlayerRealtime: React.FC = () => {
         },
         {
           isLive: true,
+          liveBufferLatencyChasing: true,
         },
       );
       player.attachMediaElement(videoRef.current);
       player.load();
       player.play();
+
+      playerRef.current = player;
     }
   };
 
