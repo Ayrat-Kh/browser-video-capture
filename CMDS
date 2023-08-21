@@ -7,9 +7,6 @@ docker rm web-frontend
 docker pull 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend
 docker run -d --name web-frontend -p 3000:3000 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend
 
-docker run -d --name web-frontend -p 443:3000 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend
-
-docker run --name web-frontend -p 3000:3000 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend
 
 ## backend
 
