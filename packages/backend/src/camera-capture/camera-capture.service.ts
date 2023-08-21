@@ -104,7 +104,7 @@ export class CameraCaptureService {
         // // ...['-preset', 'veryfast'],
 
         // image
-        ...['-qscale:v', '4'],
+        ...['-qscale:v', '10'],
         ...['-vf', 'fps=20'],
         ...['-pix_fmt', 'yuvj420p'],
         ...['-f', 'image2pipe'],
