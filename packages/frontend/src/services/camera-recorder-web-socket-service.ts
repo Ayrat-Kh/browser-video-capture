@@ -2,7 +2,8 @@ import {
   CAMERA_FRAME_RATE_MSEC,
   CAMERA_RESOLUTION,
   CAMERA_CAPTURE_NS,
-  UPLOAD_CHUNK_MESSAGE,
+  VIDEO_WS_EVENTS,
+  WebSocketConnectParams,
 } from '@webcam/common';
 
 import { SERVER_UP_WAIT_TIME_MSEC, SOCKET_URL } from 'src/constants/Config';
@@ -40,7 +41,7 @@ export class CameraRecorderService {
       query: {
         sensorId: this.#sensorId,
         sensorName: this.#sensorName,
-      },
+      } as WebSocketConnectParams,
     });
 
     // just to remember this context
@@ -73,7 +74,6 @@ export class CameraRecorderService {
 
     this.#recorder = new MediaRecorder(this.#stream, {
       mimeType: 'video/webm',
-      videoBitsPerSecond: 150_000,
     });
 
     this.#socket.connect();
@@ -120,7 +120,7 @@ export class CameraRecorderService {
 
     this.#isSending = true;
 
-    await this.#socket.emitWithAck(UPLOAD_CHUNK_MESSAGE, event.data);
+    await this.#socket.emitWithAck(VIDEO_WS_EVENTS.UPLOAD_CHUNK, event.data);
 
     this.#isSending = false;
   }

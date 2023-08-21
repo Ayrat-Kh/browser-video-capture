@@ -8,6 +8,6 @@ export class ConfigurationService {
   constructor(private readonly configService: ConfigService) {}
 
   public get<TReturn = string>(propName: keyof TConfiguration): TReturn {
-    return this.configService.get(propName);
+    return this.configService.get(propName) as TReturn;
   }
 }

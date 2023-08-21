@@ -33,7 +33,7 @@ export class CameraCaptureController {
       sensorId,
       sensorName,
       chunk: chunk.buffer,
-      isFirstChunk: isFirstChunk === 'true',
+      // isFirstChunk: isFirstChunk === 'true',
     });
   }
 
@@ -67,24 +67,24 @@ export class CameraCaptureController {
     // });
   }
 
-  @Get('/:sensorId/image')
-  async getLatestImage(
-    @Param('sensorId') sensorId: string,
-    @Res() response: Response,
-  ) {
-    const latestImage = await this.cameraCaptureService.getLatestImage(
-      sensorId,
-    );
+  // @Get('/:sensorId/image')
+  // async getLatestImage(
+  //   @Param('sensorId') sensorId: string,
+  //   @Res() response: Response,
+  // ) {
+  //   const latestImage = await this.cameraCaptureService.getLatestImage(
+  //     sensorId,
+  //   );
 
-    if (!latestImage) {
-      response.status(400);
-      response.send({
-        isSuccess: false,
-      });
-      return;
-    }
-    response.setHeader('Content-Type', 'image/jpeg');
+  //   if (!latestImage) {
+  //     response.status(400);
+  //     response.send({
+  //       isSuccess: false,
+  //     });
+  //     return;
+  //   }
+  //   response.setHeader('Content-Type', 'image/jpeg');
 
-    latestImage.pipe(response, { end: true });
-  }
+  //   latestImage.pipe(response, { end: true });
+  // }
 }

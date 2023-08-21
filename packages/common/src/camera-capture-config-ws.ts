@@ -1,3 +1,7 @@
 export const CAMERA_CAPTURE_NS = "/camera-capture";
 
-export const UPLOAD_CHUNK_MESSAGE = "stream-chunk.upload";
+export const VIDEO_WS_EVENTS = {
+  UPLOAD_CHUNK: "stream-chunk.upload",
+  SUBSCRIBE_TO_LATEST_IMAGE: "stream-chunk.subscribe-to-latest-image",
+  LATEST_IMAGE: "stream-chunk.download-latest-image",
+} as const;

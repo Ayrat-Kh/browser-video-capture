@@ -1,18 +1,19 @@
 {
   "compilerOptions": {
-    
-    "module": "CommonJS",
+    "module": "commonjs",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "ESNext",
+    "target": "es2017",
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
     "incremental": true,
-    "skipLibCheck": true
+    "paths": {
+      "@common": ["../common/src"],
+      "src/*": ["./src/*"]
+    }
   },
-  "include": ["src/**/*", "test/**/*"]
+  "exclude": ["node_modules", "dist"]
 }

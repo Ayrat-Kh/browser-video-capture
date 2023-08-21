@@ -2,11 +2,12 @@ import { Module } from '@nestjs/common';
 
 import { CameraCaptureController } from './camera-capture.controller';
 import { CameraCaptureService } from './camera-capture.service';
-import { ConfigurationModule } from 'src/config/configuation.module';
+import { CameraCaptureGateway } from './camera-capture.gateway';
+import { ConfigurationModule } from '../config/configuation.module';
 
 @Module({
   imports: [ConfigurationModule],
-  providers: [CameraCaptureService],
+  providers: [CameraCaptureService, CameraCaptureGateway],
   controllers: [CameraCaptureController],
 })
 export class CameraCaptureModule {}

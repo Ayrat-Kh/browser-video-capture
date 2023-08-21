@@ -3,7 +3,7 @@
   "private": true,
   "version": "1.0.0",
   "main": "./src/index.ts",
-  "scripts": {},
+  "main:src": "src/index.ts",
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
