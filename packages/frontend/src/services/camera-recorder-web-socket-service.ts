@@ -23,7 +23,6 @@ export class CameraRecorderService {
   #sensorId: string;
   #stream: MediaStream | null = null;
   #socket: Socket;
-  #isSending = false;
 
   constructor({
     sensorId,
@@ -69,6 +68,11 @@ export class CameraRecorderService {
       audio: false,
       video: {
         ...CAMERA_RESOLUTION,
+        frameRate: {
+          min: 15,
+          ideal: 20,
+          max: 20,
+        },
       },
     });
 
@@ -113,15 +117,6 @@ export class CameraRecorderService {
   }
 
   private async handleDataAvailable(event: BlobEvent): Promise<void> {
-    if (this.#isSending) {
-      console.log('dropped frame');
-      return;
-    }
-
-    this.#isSending = true;
-
-    await this.#socket.emitWithAck(VIDEO_WS_EVENTS.UPLOAD_CHUNK, event.data);
-
-    this.#isSending = false;
+    this.#socket.emit(VIDEO_WS_EVENTS.UPLOAD_CHUNK, event.data);
   }
 }

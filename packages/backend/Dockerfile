@@ -47,4 +47,4 @@ COPY --from=development /app/packages/backend/dist/ ./dist/
 EXPOSE 3001
 
 # Start application
-CMD [ "node", "dist/main.js" ]
+CMD [ "node", "dist/backend/src/main.js" ]
