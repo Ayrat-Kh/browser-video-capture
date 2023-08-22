@@ -16,7 +16,7 @@ export class CameraCaptureService {
 
   readonly #encoders = new Map<string, ChildProcess>();
   readonly #latestImageFile = new Map<string, Buffer>();
-  readonly #latestImageSubs = new Map<string, EventEmitter>();
+  readonly #upcomingLatestImageFile = new Map<string, Buffer>();
 
   constructor(private readonly configurationService: ConfigurationService) {}
 
@@ -33,6 +33,10 @@ export class CameraCaptureService {
 
   public getFirstFlvChunk(sensorId: string): Buffer {
     return this.#realtimeVideoFirstChunks.get(sensorId);
+  }
+
+  public getImageChunk(sensorId: string): Buffer {
+    return this.#latestImageFile.get(sensorId);
   }
 
   public subscribeToVideoStream(
@@ -66,49 +70,16 @@ export class CameraCaptureService {
     }
   }
 
-  public subscribeToLatestImageEmitter(
-    sensorId: string,
-    listener: (chunk: Buffer) => void,
-  ) {
-    if (!this.#latestImageSubs.has(sensorId)) {
-      const ee = new EventEmitter({ captureRejections: false });
-      ee.setMaxListeners(0);
-
-      this.#latestImageSubs.set(sensorId, ee);
-    }
-
-    this.#latestImageSubs.get(sensorId).addListener('image', listener);
-  }
-
-  public unsubscribeToLatestImageEmitter(
-    sensorId: string,
-    listener: (chunk: Buffer) => void,
-  ) {
-    if (!this.#latestImageSubs.has(sensorId)) {
-      return;
-    }
-
-    this.#latestImageSubs.get(sensorId).removeListener('image', listener);
-
-    if (this.#latestImageSubs.get(sensorId).listenerCount('image') === 0) {
-      this.#latestImageSubs.delete(sensorId);
-    }
-  }
-
   public initEncoder(sensorId: string): Promise<ChildProcess> {
     this.#resetEncoder(sensorId);
+
+    console.log(`SensorId: ${sensorId}: init encoder`);
 
     const ffmpegProcess = spawn(
       ffmpegPath as unknown as string,
       [
         ...['-i', '-'],
         '-an',
-        // flv settings
-        ...['-c:v', 'libx264'],
-        ...['-tune', 'zerolatency'],
-        ...['-preset', 'veryfast'],
-        ...['-f', 'flv'],
-        'pipe:4',
 
         // image
         ...['-c:v', 'mjpeg'],
@@ -117,12 +88,19 @@ export class CameraCaptureService {
         ...['-pix_fmt', 'yuvj420p'],
         ...['-f', 'image2pipe'],
         'pipe:3',
+
+        // flv settings
+        ...['-c:v', 'libx264'],
+        ...['-tune', 'zerolatency'],
+        ...['-preset', 'veryfast'],
+        ...['-f', 'flv'],
+        'pipe:4',
       ],
       { stdio: ['pipe', 'pipe', null, 'pipe', 'pipe'] },
     );
-    ffmpegProcess.stderr.on('data', (data: Buffer) => {
-      // console.log('data', data.toString());
-    });
+    // ffmpegProcess.stderr.on('data', (data: Buffer) => {
+    //   console.log('data', data.toString());
+    // });
     ffmpegProcess.on('close', (error: Buffer) => {
       console.log('close:', error?.toString());
     });
@@ -136,20 +114,12 @@ export class CameraCaptureService {
     });
 
     ffmpegProcess.stdio[4].on('data', (videoChunk: Buffer) => {
-      // console.log(
-      //   `sensorID: ${sensorId} accept video chunk, length: ${videoChunk.byteLength}`,
-      // );
-
       this.#initFirstChunk(sensorId, videoChunk);
       this.#sendChunk(sensorId, videoChunk);
     });
 
-    ffmpegProcess.stdio[3].on('data', (iamge: Buffer) => {
-      // console.log(
-      //   `sensorID: ${sensorId} accept image chunk, length: ${iamge.byteLength}`,
-      // );
-
-      this.#sendImage(sensorId, iamge);
+    ffmpegProcess.stdio[3].on('data', (image: Buffer) => {
+      this.#sendImage(sensorId, image);
     });
 
     this.#encoders.set(sensorId, ffmpegProcess);
@@ -158,6 +128,8 @@ export class CameraCaptureService {
   }
 
   #resetEncoder(sensorId: string) {
+    console.log(`SensorId: ${sensorId}: reset encoder`);
+
     if (this.#encoders.has(sensorId)) {
       const ffmpegProcess = this.#encoders.get(sensorId);
       this.#encoders.delete(sensorId);
@@ -169,8 +141,6 @@ export class CameraCaptureService {
     this.#realtimeVideoEmitters?.delete(sensorId);
 
     this.#latestImageFile.delete(sensorId);
-    this.#latestImageSubs?.get(sensorId)?.removeAllListeners('image');
-    this.#latestImageSubs?.delete(sensorId);
   }
 
   async #initSensorImageFolder(sensorId: string) {
@@ -200,59 +170,19 @@ export class CameraCaptureService {
   }
 
   #sendImage(sensorId: string, chunk: Buffer) {
-    console.log('send-image', chunk.byteLength);
-
-    let latestBuffer = this.#latestImageFile.get(sensorId);
+    let latestBuffer = this.#upcomingLatestImageFile.get(sensorId);
     if (latestBuffer?.byteLength % 65_536 === 0) {
       latestBuffer = Buffer.concat([latestBuffer, chunk]);
     } else {
       latestBuffer = chunk;
     }
 
-    this.#latestImageFile.set(sensorId, chunk);
+    this.#upcomingLatestImageFile.set(sensorId, chunk);
 
     if (chunk.byteLength === 65_536) {
       return;
     }
 
-    if (this.#latestImageSubs.has(sensorId)) {
-      this.#latestImageSubs.get(sensorId).emit('image', latestBuffer);
-    }
+    this.#latestImageFile.set(sensorId, latestBuffer);
   }
-
-  // async #getLatestImageFileName(sensorId: string): Promise<LatestImage | null> {
-  //   try {
-  //     const path = join(
-  //       this.configurationService.get('contentFolder'),
-  //       sensorId,
-  //     );
-
-  //     console.log('path', path);
-
-  //     const folders = (await readdir(path))
-  //       .map((x) => Number.parseFloat(x))
-  //       .filter((x) => Number.isFinite(x))
-  //       .sort((a, b) => b - a);
-
-  //     console.log('folders count', folders.length);
-  //     const [latestFolder] = folders;
-
-  //     const lastUploadedFolder = join(path, `${latestFolder}`);
-
-  //     console.log('folders count', folders.length);
-
-  //     const [latestFile] = (await readdir(lastUploadedFolder))
-  //       .map((x) => ({ time: Number.parseFloat(x), name: x }))
-  //       .filter((x) => Number.isFinite(x.time))
-  //       .sort((a, b) => b.time - a.time);
-
-  //     return {
-  //       fileName: latestFile.name,
-  //       folder: lastUploadedFolder,
-  //     };
-  //   } catch (e) {
-  //     console.log('error opening file', e);
-  //     return null;
-  //   }
-  // }
 }

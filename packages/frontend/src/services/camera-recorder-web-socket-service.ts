@@ -40,6 +40,7 @@ export class CameraRecorderService {
       query: {
         sensorId: this.#sensorId,
         sensorName: this.#sensorName,
+        isRecorder: 'yes',
       } as WebSocketConnectParams,
     });
 

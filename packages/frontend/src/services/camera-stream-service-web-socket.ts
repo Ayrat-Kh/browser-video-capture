@@ -1,5 +1,6 @@
 import {
   CAMERA_CAPTURE_NS,
+  CAMERA_FRAME_RATE_MSEC,
   VIDEO_WS_EVENTS,
   WebSocketConnectParams,
 } from '@webcam/common';
@@ -16,6 +17,7 @@ export class CameraStreamService {
   #canvas: HTMLCanvasElement;
   #sensorId: string;
   #socket: Socket;
+  #timer: NodeJS.Timeout | undefined;
   #isFetching = false;
 
   constructor({ canvas, sensorId }: CameraStreamServiceParams) {
@@ -25,36 +27,43 @@ export class CameraStreamService {
       autoConnect: false,
       protocols: ['websocket'],
       query: {
+        isRecorder: 'no',
         sensorId: this.#sensorId,
       } as WebSocketConnectParams,
     });
 
     this.#canvas = canvas;
     this.handleRequest = this.handleRequest.bind(this);
+    this.handleRequestData = this.handleRequestData.bind(this);
   }
 
   public async initialize(): Promise<CameraStreamService> {
     await this.close();
 
-    this.#socket.on(VIDEO_WS_EVENTS.LATEST_IMAGE, this.handleRequest);
     this.#socket.connect();
-    this.#socket.emit(VIDEO_WS_EVENTS.SUBSCRIBE_TO_LATEST_IMAGE);
+
+    this.#socket.on(VIDEO_WS_EVENTS.LATEST_IMAGE, this.handleRequestData);
+    this.#timer = setInterval(this.handleRequest, CAMERA_FRAME_RATE_MSEC);
 
     return this;
   }
 
   public close(): Promise<CameraStreamService> {
     this.#socket?.close();
+    clearInterval(this.#timer);
 
     return Promise.resolve(this);
   }
 
-  private async handleRequest(chunk: ArrayBuffer) {
+  private async handleRequest() {
     if (this.#isFetching) {
       return;
     }
     this.#isFetching = true;
+    this.#socket.emit(VIDEO_WS_EVENTS.LATEST_IMAGE_REQUEST);
+  }
 
+  private async handleRequestData(chunk: ArrayBuffer) {
     try {
       const bitmap = await createImageBitmap(
         new Blob([chunk], { type: 'image/jpeg' }),

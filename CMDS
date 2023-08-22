@@ -9,19 +9,20 @@ docker run -d --name web-frontend -p 3000:3000 935995184596.dkr.ecr.us-east-1.am
 
 
 ## backend
-
 yarn build:docker:backend:staging
 docker push 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-backend
 docker pull 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-backend
 docker kill web-backend
-docker logs web-backend
+docker rm web-backend
 docker run -d --name web-backend -v /home/ubuntu/photos:/home/ubuntu/photos -p 3001:3001 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-backend
 
+## helper
+docker logs web-backend
 
 ## SSH
-
 ssh -i "~/.ssh/airat-key.pem" ubuntu@ec2-100-24-12-229.compute-1.amazonaws.com
 
+## set url
 chrome://flags/#unsafely-treat-insecure-origin-as-secure
 
 https://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@github.com/Ayrat-Kh/webcam-analyzer.git

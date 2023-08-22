@@ -1,6 +1,5 @@
 import {
   OnGatewayConnection,
-  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
@@ -8,7 +7,6 @@ import {
   CAMERA_CAPTURE_NS,
   VIDEO_WS_EVENTS,
   WebSocketConnectParams,
-  // WebSocketSubscribeToLatestImage,
 } from '@common';
 import { Socket } from 'socket.io';
 import { CameraCaptureService } from './camera-capture.service';
@@ -17,27 +15,15 @@ import { CameraCaptureService } from './camera-capture.service';
   namespace: CAMERA_CAPTURE_NS,
   cors: true,
 })
-export class CameraCaptureGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
-  #imageSubs = new Map<string, (chunk: Buffer) => void>();
-
+export class CameraCaptureGateway implements OnGatewayConnection {
   constructor(private readonly cameraCaptureService: CameraCaptureService) {}
-  handleDisconnect(client: Socket) {
-    const query = client.handshake.query as unknown as WebSocketConnectParams;
-    if (this.#imageSubs.has(query.sensorId)) {
-      this.cameraCaptureService.unsubscribeToLatestImageEmitter(
-        query.sensorId,
-        this.#imageSubs.get(query.sensorId),
-      );
-      this.#imageSubs.delete(query.sensorId);
-    }
-  }
 
   async handleConnection(client: Socket) {
     const query = client.handshake.query as unknown as WebSocketConnectParams;
 
-    await this.cameraCaptureService.initEncoder(query.sensorId);
+    if (query.isRecorder === 'yes') {
+      await this.cameraCaptureService.initEncoder(query.sensorId);
+    }
   }
 
   @SubscribeMessage(VIDEO_WS_EVENTS.UPLOAD_CHUNK)
@@ -52,20 +38,13 @@ export class CameraCaptureGateway
     return true;
   }
 
-  @SubscribeMessage(VIDEO_WS_EVENTS.SUBSCRIBE_TO_LATEST_IMAGE)
-  async subscribeLatestImage(client: Socket): Promise<boolean> {
+  @SubscribeMessage(VIDEO_WS_EVENTS.LATEST_IMAGE_REQUEST)
+  async subscribeLatestImage(client: Socket) {
     const query = client.handshake.query as unknown as WebSocketConnectParams;
 
-    const subFn = (chunk: Buffer) => {
-      client.emit(VIDEO_WS_EVENTS.LATEST_IMAGE, chunk);
-    };
-
-    this.#imageSubs.set(query.sensorId, subFn);
-    this.cameraCaptureService.subscribeToLatestImageEmitter(
-      query.sensorId,
-      subFn,
+    client.emit(
+      VIDEO_WS_EVENTS.LATEST_IMAGE,
+      this.cameraCaptureService.getImageChunk(query.sensorId),
     );
-
-    return true;
   }
 }

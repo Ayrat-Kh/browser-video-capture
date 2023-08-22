@@ -9,7 +9,7 @@ export const PlayerRealtime: React.FC = () => {
   const playerRef = useRef<mpegts.Player | null>(null);
 
   const handlePlay = () => {
-    playerRef.current?.pause();
+    playerRef.current?.destroy();
 
     if (mpegts.isSupported() && videoRef.current) {
       const player = mpegts.createPlayer(
