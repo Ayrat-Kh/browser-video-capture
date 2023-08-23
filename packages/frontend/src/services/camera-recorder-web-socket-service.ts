@@ -14,6 +14,7 @@ interface CameraRecorderServiceParams {
   makeTestApi?: boolean;
   sensorName: string;
   sensorId: string;
+  organizationId: string;
 }
 
 export class CameraRecorderService {
@@ -28,6 +29,7 @@ export class CameraRecorderService {
     sensorId,
     sensorName,
     makeTestApi,
+    organizationId,
   }: CameraRecorderServiceParams) {
     this.#makeTestApi = makeTestApi ?? false;
 
@@ -40,6 +42,7 @@ export class CameraRecorderService {
       query: {
         sensorId: this.#sensorId,
         sensorName: this.#sensorName,
+        organizationId,
         isRecorder: 'yes',
       } as WebSocketConnectParams,
     });
@@ -118,6 +121,6 @@ export class CameraRecorderService {
   }
 
   private async handleDataAvailable(event: BlobEvent): Promise<void> {
-    this.#socket.emit(VIDEO_WS_EVENTS.UPLOAD_CHUNK, event.data);
+    this.#socket.compress(true).emit(VIDEO_WS_EVENTS.UPLOAD_CHUNK, event.data);
   }
 }

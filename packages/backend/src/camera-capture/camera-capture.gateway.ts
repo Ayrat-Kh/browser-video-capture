@@ -42,9 +42,11 @@ export class CameraCaptureGateway implements OnGatewayConnection {
   async subscribeLatestImage(client: Socket) {
     const query = client.handshake.query as unknown as WebSocketConnectParams;
 
-    client.emit(
-      VIDEO_WS_EVENTS.LATEST_IMAGE,
-      this.cameraCaptureService.getImageChunk(query.sensorId),
-    );
+    client
+      .compress(true)
+      .emit(
+        VIDEO_WS_EVENTS.LATEST_IMAGE,
+        this.cameraCaptureService.getImageChunk(query.sensorId),
+      );
   }
 }
