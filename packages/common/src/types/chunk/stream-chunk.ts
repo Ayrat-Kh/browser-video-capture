@@ -1,7 +1,7 @@
 export interface StreamVideoChunkParams {
+  organizationId: string;
   sensorId: string;
   sensorName: string;
-  chunk: Blob;
 }
 
 export interface StreamVideoChunkResult {
@@ -12,4 +12,5 @@ export interface WebSocketConnectParams {
   isRecorder: "yes" | "no"; // being send over http
   sensorId: string;
   sensorName: string;
+  organizationId: string;
 }

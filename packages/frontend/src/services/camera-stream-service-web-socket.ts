@@ -5,7 +5,7 @@ import {
   WebSocketConnectParams,
 } from '@webcam/common';
 
-import { SOCKET_URL } from 'src/constants/Config';
+import { PLAYER_SOCKET_URL } from 'src/constants/Config';
 import { Socket, io } from 'socket.io-client';
 
 interface CameraStreamServiceParams {
@@ -23,7 +23,7 @@ export class CameraStreamService {
   constructor({ canvas, sensorId }: CameraStreamServiceParams) {
     this.#sensorId = sensorId;
 
-    this.#socket = io(`${SOCKET_URL}${CAMERA_CAPTURE_NS}`, {
+    this.#socket = io(`${PLAYER_SOCKET_URL}${CAMERA_CAPTURE_NS}`, {
       autoConnect: false,
       protocols: ['websocket'],
       query: {

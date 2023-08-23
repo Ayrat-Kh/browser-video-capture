@@ -1,12 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z, type TypeOf } from 'zod';
-import { v4 } from 'uuid';
+import mpegts from 'mpegts.js';
 
+import { STREAMER_APP_URL } from 'src/constants/Config';
 import { CAMERA_RESOLUTION } from '@webcam/common';
-import { Input } from 'src/atoms/ui/input';
-import { CameraRecorderService } from 'src/services/camera-recorder-web-socket-service';
 import {
   Form,
   FormControl,
@@ -15,6 +11,10 @@ import {
   FormLabel,
   FormMessage,
 } from 'src/atoms/ui/form';
+import { Input } from 'src/atoms/ui/input';
+import { useForm } from 'react-hook-form';
+import { type TypeOf, z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from 'src/atoms/ui/button';
 
 const schema = z.object({
@@ -25,10 +25,9 @@ const schema = z.object({
 
 type Schema = TypeOf<typeof schema>;
 
-export const Streamer: React.FC = () => {
+export const FlvPlayer: React.FC = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [steamerService, setSteamerService] =
-    useState<CameraRecorderService | null>(null);
+  const [player, setPlayer] = useState<mpegts.Player | null>(null);
 
   const form = useForm<Schema>({
     resolver: zodResolver(schema),
@@ -36,35 +35,32 @@ export const Streamer: React.FC = () => {
   const { reset: resetForm } = form;
 
   const handleCapture = async (values: Schema) => {
-    if (steamerService) {
-      await steamerService?.close();
-      setSteamerService(null);
+    if (player) {
+      player?.destroy();
+      setPlayer(null);
       return;
     }
 
-    localStorage.setItem('session', JSON.stringify(values));
+    if (mpegts.isSupported() && videoRef.current) {
+      const player = mpegts.createPlayer(
+        {
+          type: 'flv',
+          isLive: true,
+          hasVideo: true,
+          hasAudio: false,
+          url: `${STREAMER_APP_URL}/org/${values.organizationId}/player/${values.sensorId}`,
+        },
+        {
+          isLive: true,
+          liveBufferLatencyChasing: true,
+        },
+      );
+      player.attachMediaElement(videoRef.current);
+      player.load();
+      player.play();
 
-    const ss = new CameraRecorderService({
-      ...values,
-      makeTestApi: true,
-    });
-
-    await ss.initialize();
-    await ss.start();
-
-    const stream = ss.getStream();
-    if (videoRef.current && stream) {
-      videoRef.current.srcObject = stream;
+      setPlayer(player);
     }
-
-    setSteamerService(ss);
-  };
-
-  const handleGenerateId = () => {
-    form.setValue('sensorId', v4(), {
-      shouldTouch: true,
-      shouldValidate: true,
-    });
   };
 
   useEffect(() => {
@@ -110,43 +106,24 @@ export const Streamer: React.FC = () => {
                 <FormItem className="col-span-3">
                   <FormLabel>Sensor id</FormLabel>
                   <FormControl>
-                    <Input disabled placeholder="Sensor id" {...field} />
+                    <Input placeholder="Sensor id" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="button" onClick={handleGenerateId}>
-              Generate id
-            </Button>
           </div>
 
-          <FormField
-            control={form.control}
-            name="sensorName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Sensor name</FormLabel>
-                <FormControl>
-                  <Input placeholder="Sensor name" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
           <Button type="submit" className="self-end">
-            {steamerService ? 'Stop' : 'Start capture'}
+            {player ? 'Stop' : 'Start playing'}
           </Button>
         </form>
       </Form>
       <video
-        className="border aspect-video w-100 max-w-2xl mt-2"
         ref={videoRef}
+        style={CAMERA_RESOLUTION}
         width={CAMERA_RESOLUTION.width}
         height={CAMERA_RESOLUTION.height}
-        muted
-        autoPlay
       />
     </div>
   );

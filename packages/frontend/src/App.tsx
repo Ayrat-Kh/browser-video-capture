@@ -2,9 +2,8 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import { Streamer } from 'src/components/Streamer';
 
-import { Player } from 'src/components/Player';
-import { PlayerRealtime } from 'src/components/Player-realtime';
-import { PlayerWs } from './components/Player-ws';
+import { FlvPlayer } from 'src/components/FlvPlayer';
+import { ImagePlayer } from './components/ImagePlayer';
 
 const router = createBrowserRouter([
   {
@@ -12,16 +11,12 @@ const router = createBrowserRouter([
     element: <Streamer />,
   },
   {
-    path: '/player',
-    element: <Player />,
+    path: '/flv/player',
+    element: <FlvPlayer />,
   },
   {
-    path: '/player-realtime',
-    element: <PlayerRealtime />,
-  },
-  {
-    path: '/player-ws',
-    element: <PlayerWs />,
+    path: '/image/player',
+    element: <ImagePlayer />,
   },
 ]);
 

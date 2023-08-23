@@ -22,7 +22,7 @@ export class CameraCaptureGateway implements OnGatewayConnection {
     const query = client.handshake.query as unknown as WebSocketConnectParams;
 
     if (query.isRecorder === 'yes') {
-      await this.cameraCaptureService.initEncoder(query.sensorId);
+      await this.cameraCaptureService.initEncoder(query);
     }
   }
 

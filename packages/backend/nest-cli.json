@@ -2,12 +2,12 @@
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
   "monorepo": true,
-  "root": "apps/webcam-backend",
+  "root": "",
   "projects": {
     "streamer": {
       "type": "application",
       "root": "apps/streamer",
-      "entryFile": "./backend/src/main.js",
+      "entryFile": "./backend/apps/streamer/src/main.js",
       "sourceRoot": "apps/streamer/src",
       "compilerOptions": {
         "deleteOutDir": false,
@@ -18,7 +18,7 @@
     "visualizer": {
       "type": "application",
       "root": "apps/visualizer",
-      "entryFile": "main",
+      "entryFile": "./backend/apps/visualizer/src/main.js",
       "sourceRoot": "apps/visualizer/src",
       "compilerOptions": {
         "deleteOutDir": false,

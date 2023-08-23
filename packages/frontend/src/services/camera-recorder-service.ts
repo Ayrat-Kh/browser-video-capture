@@ -1,13 +1,23 @@
-import { CAMERA_FRAME_RATE_MSEC, CAMERA_RESOLUTION } from '@webcam/common';
+import {
+  CAMERA_FRAME_RATE_MSEC,
+  CAMERA_RESOLUTION,
+  CAMERA_CAPTURE_NS,
+  VIDEO_WS_EVENTS,
+  WebSocketConnectParams,
+} from '@webcam/common';
 
-import { SERVER_UP_WAIT_TIME_MSEC } from 'src/constants/Config';
-import { ping } from './api/ping-api';
-import { recordVideoChunk } from './api/stream-api';
+import {
+  SERVER_UP_WAIT_TIME_MSEC,
+  STREAMER_SOCKET_URL,
+} from 'src/constants/Config';
+import { streamerPing } from './api/ping-api';
+import { Socket, io } from 'socket.io-client';
 
 interface CameraRecorderServiceParams {
   makeTestApi?: boolean;
   sensorName: string;
   sensorId: string;
+  organizationId: string;
 }
 
 export class CameraRecorderService {
@@ -15,29 +25,40 @@ export class CameraRecorderService {
   #makeTestApi: boolean;
   #sensorName: string;
   #sensorId: string;
-  #isSending = false;
   #stream: MediaStream | null = null;
-  #isFirstChunk = true;
+  #socket: Socket;
 
   constructor({
     sensorId,
     sensorName,
     makeTestApi,
+    organizationId,
   }: CameraRecorderServiceParams) {
     this.#makeTestApi = makeTestApi ?? false;
+
     this.#sensorId = sensorId;
     this.#sensorName = sensorName;
+
+    this.#socket = io(`${STREAMER_SOCKET_URL}${CAMERA_CAPTURE_NS}`, {
+      autoConnect: false,
+      protocols: ['websocket'],
+      query: {
+        sensorId: this.#sensorId,
+        sensorName: this.#sensorName,
+        organizationId,
+        isRecorder: 'yes',
+      } as WebSocketConnectParams,
+    });
 
     // just to remember this context
     this.handleDataAvailable = this.handleDataAvailable.bind(this);
   }
 
   public async initialize(): Promise<CameraRecorderService> {
-    this.#isFirstChunk = true;
     await this.close();
 
     while (this.#makeTestApi) {
-      const result = await ping();
+      const result = await streamerPing();
       console.log('result', result);
 
       if (result.isSuccess) {
@@ -54,22 +75,36 @@ export class CameraRecorderService {
       audio: false,
       video: {
         ...CAMERA_RESOLUTION,
+        frameRate: {
+          min: 15,
+          ideal: 20,
+          max: 20,
+        },
       },
     });
 
     this.#recorder = new MediaRecorder(this.#stream, {
       mimeType: 'video/webm',
-      videoBitsPerSecond: 150_000,
     });
+
+    this.#socket.connect();
 
     this.#recorder.addEventListener('dataavailable', this.handleDataAvailable);
 
     return this;
   }
 
-  public start(): Promise<CameraRecorderService> {
+  public async start(): Promise<CameraRecorderService> {
+    await new Promise<void>((resolve) => {
+      const resolveWrapper = () => {
+        resolve();
+        this.#socket?.off('connect', resolveWrapper);
+      };
+      this.#socket?.on('connect', resolveWrapper);
+    });
+
     this.#recorder?.start(CAMERA_FRAME_RATE_MSEC);
-    return Promise.resolve(this);
+    return this;
   }
 
   public close(): Promise<CameraRecorderService> {
@@ -79,6 +114,7 @@ export class CameraRecorderService {
       this.handleDataAvailable,
     );
     this.#recorder = null;
+    this.#socket?.close();
 
     return Promise.resolve(this);
   }
@@ -88,20 +124,6 @@ export class CameraRecorderService {
   }
 
   private async handleDataAvailable(event: BlobEvent): Promise<void> {
-    if (this.#isSending) {
-      console.log('dropped frame');
-      return;
-    }
-    this.#isSending = true;
-
-    await recordVideoChunk({
-      chunk: event.data,
-      sensorId: this.#sensorId,
-      sensorName: this.#sensorName,
-      isFirstChunk: this.#isFirstChunk ? 'true' : 'false',
-    });
-
-    this.#isFirstChunk = false;
-    this.#isSending = false;
+    this.#socket.compress(true).emit(VIDEO_WS_EVENTS.UPLOAD_CHUNK, event.data);
   }
 }
