@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CameraCaptureGateway } from './camera-capture.gateway';
+import { CameraCaptureGateway } from './streamer.gateway';
 
 describe('CameraCaptureGateway', () => {
   let gateway: CameraCaptureGateway;

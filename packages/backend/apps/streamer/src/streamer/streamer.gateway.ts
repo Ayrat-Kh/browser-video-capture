@@ -9,14 +9,14 @@ import {
   WebSocketConnectParams,
 } from '@common';
 import { Socket } from 'socket.io';
-import { CameraCaptureService } from './camera-capture.service';
+import { StreamerService } from './streamer.service';
 
 @WebSocketGateway({
   namespace: CAMERA_CAPTURE_NS,
   cors: true,
 })
 export class CameraCaptureGateway implements OnGatewayConnection {
-  constructor(private readonly cameraCaptureService: CameraCaptureService) {}
+  constructor(private readonly cameraCaptureService: StreamerService) {}
 
   async handleConnection(client: Socket) {
     const query = client.handshake.query as unknown as WebSocketConnectParams;
@@ -36,17 +36,5 @@ export class CameraCaptureGateway implements OnGatewayConnection {
     });
 
     return true;
-  }
-
-  @SubscribeMessage(VIDEO_WS_EVENTS.LATEST_IMAGE_REQUEST)
-  async subscribeLatestImage(client: Socket) {
-    const query = client.handshake.query as unknown as WebSocketConnectParams;
-
-    client
-      .compress(true)
-      .emit(
-        VIDEO_WS_EVENTS.LATEST_IMAGE,
-        this.cameraCaptureService.getImageChunk(query.sensorId),
-      );
   }
 }

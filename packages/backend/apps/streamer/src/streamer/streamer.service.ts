@@ -7,10 +7,10 @@ import { Injectable } from '@nestjs/common';
 import * as ffmpegPath from 'ffmpeg-static';
 
 import type { StreamVideoChunkParams } from '@webcam/common';
-import { ConfigurationService } from '../config/configuation.service';
+import { ConfigurationService } from '../config/configuration.service';
 
 @Injectable()
-export class CameraCaptureService {
+export class StreamerService {
   readonly #realtimeVideoFirstChunks = new Map<string, Buffer>();
   readonly #realtimeVideoEmitters = new Map<string, EventEmitter>();
 
@@ -71,7 +71,7 @@ export class CameraCaptureService {
   }
 
   public initEncoder(sensorId: string): Promise<ChildProcess> {
-    this.#resetEncoder(sensorId);
+    this.resetEncoder(sensorId);
 
     console.log(`SensorId: ${sensorId}: init encoder`);
 
@@ -98,19 +98,9 @@ export class CameraCaptureService {
       ],
       { stdio: ['pipe', 'pipe', null, 'pipe', 'pipe'] },
     );
-    // ffmpegProcess.stderr.on('data', (data: Buffer) => {
-    //   console.log('data', data.toString());
-    // });
+
     ffmpegProcess.on('close', (error: Buffer) => {
       console.log('close:', error?.toString());
-    });
-
-    ffmpegProcess.on('message', (error: Buffer) => {
-      console.log('message:', error.toString());
-    });
-
-    ffmpegProcess.on('error', (error: Buffer) => {
-      console.log('error:', error.toString());
     });
 
     ffmpegProcess.stdio[4].on('data', (videoChunk: Buffer) => {
@@ -127,7 +117,7 @@ export class CameraCaptureService {
     return Promise.resolve(ffmpegProcess);
   }
 
-  #resetEncoder(sensorId: string) {
+  resetEncoder(sensorId: string) {
     console.log(`SensorId: ${sensorId}: reset encoder`);
 
     if (this.#encoders.has(sensorId)) {
