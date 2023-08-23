@@ -2,7 +2,9 @@
   "$schema": "https://json.schemastore.org/nest-cli",
   "collection": "@nestjs/schematics",
   "monorepo": true,
-  "root": "",
+  "compilerOptions": {
+    "deleteOutDir": true
+  },
   "projects": {
     "streamer": {
       "type": "application",
@@ -10,7 +12,6 @@
       "entryFile": "./backend/apps/streamer/src/main.js",
       "sourceRoot": "apps/streamer/src",
       "compilerOptions": {
-        "deleteOutDir": false,
         "webpack": false,
         "tsConfigPath": "apps/streamer/tsconfig.app.json"
       }
@@ -21,7 +22,6 @@
       "entryFile": "./backend/apps/visualizer/src/main.js",
       "sourceRoot": "apps/visualizer/src",
       "compilerOptions": {
-        "deleteOutDir": false,
         "webpack": false,
         "tsConfigPath": "apps/visualizer/tsconfig.app.json"
       }

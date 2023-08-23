@@ -23,6 +23,8 @@ RUN yarn build:backend
 # Runtime (production) layer
 FROM node:16-alpine as production
 
+ARG ENV_FILE
+
 WORKDIR /app
 
 # Copy dependencies files
@@ -34,7 +36,7 @@ COPY ./yarn.lock ./
 # Install runtime dependecies (without dev/test dependecies)
 RUN yarn --production=true
 
-ARG ENV_FILE
+
 
 RUN echo "ENV file: $ENV_FILE"
 
@@ -47,4 +49,4 @@ COPY --from=development /app/packages/backend/dist/ ./dist/
 EXPOSE 3001
 
 # Start application
-CMD [ "node", "dist/backend/src/main.js" ]
+CMD [ "node", "dist/backend/apps/streamer/src/main.js" ]

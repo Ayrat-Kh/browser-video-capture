@@ -108,7 +108,10 @@ export class CameraRecorderService {
   }
 
   public close(): Promise<CameraRecorderService> {
-    this.#recorder?.stop();
+    this.#recorder?.stream?.getTracks()?.forEach((x) => {
+      x.stop();
+    });
+
     this.#recorder?.removeEventListener(
       'dataavailable',
       this.handleDataAvailable,

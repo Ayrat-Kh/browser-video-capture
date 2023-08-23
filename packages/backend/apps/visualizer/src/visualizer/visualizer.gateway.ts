@@ -9,14 +9,14 @@ import {
   WebSocketConnectParams,
 } from '@common';
 import { Socket } from 'socket.io';
-import { CameraCaptureService } from './visualizer.service';
+import { VisualizerService } from './visualizer.service';
 
 @WebSocketGateway({
   namespace: CAMERA_CAPTURE_NS,
   cors: true,
 })
 export class VisualizerGateway implements OnGatewayConnection {
-  constructor(private readonly cameraCaptureService: CameraCaptureService) {}
+  constructor(private readonly cameraCaptureService: VisualizerService) {}
 
   async handleConnection(_client: Socket) {}
 
@@ -24,11 +24,11 @@ export class VisualizerGateway implements OnGatewayConnection {
   async subscribeLatestImage(client: Socket) {
     const query = client.handshake.query as unknown as WebSocketConnectParams;
 
-    client
-      .compress(true)
-      .emit(
-        VIDEO_WS_EVENTS.LATEST_IMAGE,
-        this.cameraCaptureService.getImageChunk(query.sensorId),
-      );
+    // client
+    //   .compress(true)
+    //   .emit(
+    //     VIDEO_WS_EVENTS.LATEST_IMAGE,
+    //     this.cameraCaptureService.getImageChunk(query.sensorId),
+    //   );
   }
 }

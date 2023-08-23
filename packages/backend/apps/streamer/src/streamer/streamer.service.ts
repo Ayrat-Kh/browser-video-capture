@@ -8,6 +8,7 @@ import * as ffmpegPath from 'ffmpeg-static';
 
 import type { StreamVideoChunkParams } from '@webcam/common';
 import { ConfigurationService } from '../config/configuration.service';
+import { createWriteStream } from 'node:fs';
 
 type Identifier = Pick<StreamVideoChunkParams, 'organizationId' | 'sensorId'>;
 
@@ -141,12 +142,8 @@ export class StreamerService {
     this.#realtimeVideoEmitters?.delete(id);
   }
 
-  async #initSensorImageFolder(identifier: Identifier) {
-    const path = join(
-      this.configurationService.get('contentFolder'),
-      identifier.organizationId,
-      identifier.sensorId,
-    );
+  async initSensorImageFolder(identifier: Identifier) {
+    const path = this.#identifierToPath(identifier);
 
     try {
       if ((await stat(path)).isDirectory()) {
@@ -191,10 +188,23 @@ export class StreamerService {
     }
 
     // save image to folder
-    // latestBuffer
+    const filePath = join(
+      this.#identifierToPath(identifier),
+      `${new Date().getTime()}.jpg`,
+    );
+
+    createWriteStream(filePath).write(latestBuffer);
   }
 
   #identifierToString({ organizationId, sensorId }: Identifier): string {
     return `${organizationId}_${sensorId}`;
+  }
+
+  #identifierToPath(identifier: Identifier): string {
+    return join(
+      this.configurationService.get('contentFolder'),
+      identifier.organizationId,
+      identifier.sensorId,
+    );
   }
 }

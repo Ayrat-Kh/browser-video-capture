@@ -1,6 +1,5 @@
 import {
   CAMERA_CAPTURE_NS,
-  CAMERA_FRAME_RATE_MSEC,
   VIDEO_WS_EVENTS,
   WebSocketConnectParams,
 } from '@webcam/common';
@@ -48,12 +47,13 @@ export class CameraStreamService {
     this.#socket.connect();
 
     this.#socket.on(VIDEO_WS_EVENTS.LATEST_IMAGE, this.handleRequestData);
-    this.#timer = setInterval(this.handleRequest, CAMERA_FRAME_RATE_MSEC);
+    this.#timer = setInterval(this.handleRequest, 50);
 
     return this;
   }
 
   public close(): Promise<CameraStreamService> {
+    this.#socket?.off(VIDEO_WS_EVENTS.LATEST_IMAGE, this.handleRequestData);
     this.#socket?.close();
     clearInterval(this.#timer);
 

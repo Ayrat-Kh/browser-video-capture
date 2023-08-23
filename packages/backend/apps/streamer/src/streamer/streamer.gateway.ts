@@ -23,6 +23,7 @@ export class StreamerGateway implements OnGatewayConnection {
 
     if (query.isRecorder === 'yes') {
       await this.cameraCaptureService.initEncoder(query);
+      await this.cameraCaptureService.initSensorImageFolder(query);
     }
   }
 
