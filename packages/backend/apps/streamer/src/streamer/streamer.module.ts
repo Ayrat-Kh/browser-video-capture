@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 
 import { StreamerService } from './streamer.service';
-import { CameraCaptureGateway } from './streamer.gateway';
+import { StreamerGateway } from './streamer.gateway';
 import { ConfigurationModule } from '../config/configuration.module';
 
 @Module({
   imports: [ConfigurationModule],
-  providers: [StreamerService, CameraCaptureGateway],
+  providers: [StreamerService, StreamerGateway],
 })
-export class CameraCaptureModule {}
+export class StreamerModule {}

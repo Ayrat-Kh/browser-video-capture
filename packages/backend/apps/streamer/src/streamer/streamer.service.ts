@@ -22,11 +22,14 @@ export class StreamerService {
   constructor(private readonly configurationService: ConfigurationService) {}
 
   public async saveChunk(
-    data: Pick<StreamVideoChunkParams, 'sensorId' | 'sensorName'> & {
+    data: Pick<
+      StreamVideoChunkParams,
+      'sensorId' | 'sensorName' | 'organizationId'
+    > & {
       chunk: Buffer;
     },
   ): Promise<void> {
-    const encoder = this.#encoders.get(data.sensorId);
+    const encoder = this.#encoders.get(this.#identifierToString(data));
     encoder.stdin.write(data.chunk);
 
     return Promise.resolve();

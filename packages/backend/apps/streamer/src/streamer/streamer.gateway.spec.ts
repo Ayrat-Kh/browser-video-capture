@@ -1,15 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { CameraCaptureGateway } from './streamer.gateway';
+import { StreamerGateway } from './streamer.gateway';
 
-describe('CameraCaptureGateway', () => {
-  let gateway: CameraCaptureGateway;
+describe('StreamerGateway', () => {
+  let gateway: StreamerGateway;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [CameraCaptureGateway],
+      providers: [StreamerGateway],
     }).compile();
 
-    gateway = module.get<CameraCaptureGateway>(CameraCaptureGateway);
+    gateway = module.get<StreamerGateway>(StreamerGateway);
   });
 
   it('should be defined', () => {

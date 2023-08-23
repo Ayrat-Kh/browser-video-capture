@@ -48,7 +48,7 @@ export const FlvPlayer: React.FC = () => {
           isLive: true,
           hasVideo: true,
           hasAudio: false,
-          url: `${STREAMER_APP_URL}/org/${values.organizationId}/player/${values.sensorId}`,
+          url: `${STREAMER_APP_URL}/player/org/${values.organizationId}/sensor/${values.sensorId}`,
         },
         {
           isLive: true,

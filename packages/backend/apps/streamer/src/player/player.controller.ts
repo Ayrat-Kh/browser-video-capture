@@ -3,11 +3,11 @@ import { Response, Request } from 'express';
 
 import { StreamerService } from '../streamer/streamer.service';
 
-@Controller('/org/:organizationId/player')
+@Controller('org/:organizationId/player')
 export class PlayerController {
   constructor(private readonly streamerService: StreamerService) {}
 
-  @Get('/:sensorId')
+  @Get(':sensorId')
   async get(
     @Param('organizationId') organizationId: string,
     @Param('sensorId') sensorId: string,

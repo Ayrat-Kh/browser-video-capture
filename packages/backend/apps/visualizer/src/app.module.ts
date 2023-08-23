@@ -1,14 +1,14 @@
 import { Module } from '@nestjs/common';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 
-import { CameraCaptureModule } from './camera-capture/camera-capture.module';
+import { VisualizerModule } from './visualizer/visualizer.module';
 import { PingModule } from './ping/ping.module';
 import { ConfigurationModule } from './config/configuration.module';
 
 @Module({
   imports: [
     PingModule,
-    CameraCaptureModule,
+    VisualizerModule,
     EventEmitterModule.forRoot(),
     ConfigurationModule,
   ],

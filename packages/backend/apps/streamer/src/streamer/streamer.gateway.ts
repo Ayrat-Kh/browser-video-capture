@@ -15,7 +15,7 @@ import { StreamerService } from './streamer.service';
   namespace: CAMERA_CAPTURE_NS,
   cors: true,
 })
-export class CameraCaptureGateway implements OnGatewayConnection {
+export class StreamerGateway implements OnGatewayConnection {
   constructor(private readonly cameraCaptureService: StreamerService) {}
 
   async handleConnection(client: Socket) {
