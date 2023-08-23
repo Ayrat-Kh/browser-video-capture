@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import mpegts from 'mpegts.js';
+import { useForm } from 'react-hook-form';
+import { type TypeOf, z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 import { STREAMER_APP_URL } from 'src/constants/Config';
 import { CAMERA_RESOLUTION } from '@webcam/common';
@@ -12,9 +15,6 @@ import {
   FormMessage,
 } from 'src/atoms/ui/form';
 import { Input } from 'src/atoms/ui/input';
-import { useForm } from 'react-hook-form';
-import { type TypeOf, z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from 'src/atoms/ui/button';
 
 const schema = z.object({
@@ -120,8 +120,8 @@ export const FlvPlayer: React.FC = () => {
         </form>
       </Form>
       <video
+        className="border aspect-video w-100 max-w-2xl mt-2"
         ref={videoRef}
-        style={CAMERA_RESOLUTION}
         width={CAMERA_RESOLUTION.width}
         height={CAMERA_RESOLUTION.height}
       />

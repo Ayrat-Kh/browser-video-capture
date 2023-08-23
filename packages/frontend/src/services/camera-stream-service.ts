@@ -9,18 +9,22 @@ import { PLAYER_SOCKET_URL } from 'src/constants/Config';
 import { Socket, io } from 'socket.io-client';
 
 interface CameraStreamServiceParams {
+  organizationId: string;
   sensorId: string;
   canvas: HTMLCanvasElement;
 }
 
 export class CameraStreamService {
-  #canvas: HTMLCanvasElement;
   #sensorId: string;
+  #organizationId: string;
+
+  #canvas: HTMLCanvasElement;
   #socket: Socket;
   #timer: NodeJS.Timeout | undefined;
   #isFetching = false;
 
-  constructor({ canvas, sensorId }: CameraStreamServiceParams) {
+  constructor({ canvas, sensorId, organizationId }: CameraStreamServiceParams) {
+    this.#organizationId = organizationId;
     this.#sensorId = sensorId;
 
     this.#socket = io(`${PLAYER_SOCKET_URL}${CAMERA_CAPTURE_NS}`, {
@@ -29,6 +33,7 @@ export class CameraStreamService {
       query: {
         isRecorder: 'no',
         sensorId: this.#sensorId,
+        organizationId: this.#organizationId,
       } as WebSocketConnectParams,
     });
 

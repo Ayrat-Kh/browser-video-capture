@@ -6,7 +6,7 @@ import { v4 } from 'uuid';
 
 import { CAMERA_RESOLUTION } from '@webcam/common';
 import { Input } from 'src/atoms/ui/input';
-import { CameraRecorderService } from 'src/services/camera-recorder-web-socket-service';
+import { CameraRecorderService } from 'src/services/camera-recorder-service';
 import {
   Form,
   FormControl,
