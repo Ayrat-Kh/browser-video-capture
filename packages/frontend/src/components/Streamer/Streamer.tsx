@@ -37,7 +37,13 @@ export const Streamer: React.FC = () => {
   const { reset: resetForm } = form;
 
   const handleCapture = async (values: Schema) => {
-    await steamerService?.close();
+    if (steamerService) {
+      await steamerService?.close();
+      setSteamerService(null);
+      return;
+    }
+
+    localStorage.setItem('session', JSON.stringify(values));
 
     const ss = new CameraRecorderService({
       ...values,
@@ -58,7 +64,7 @@ export const Streamer: React.FC = () => {
   const handleGenerateId = () => {
     form.setValue('sensorId', v4(), {
       shouldTouch: true,
-      shouldValidate: false,
+      shouldValidate: true,
     });
   };
 
@@ -77,11 +83,11 @@ export const Streamer: React.FC = () => {
   }, [resetForm]);
 
   return (
-    <div>
+    <div className="p-2">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleCapture)}
-          className="space-y-2 max-w-2xl p-2"
+          className="flex flex-col space-y-2 max-w-2xl"
         >
           <FormField
             control={form.control}
@@ -97,12 +103,12 @@ export const Streamer: React.FC = () => {
             )}
           />
 
-          <div className="grid grid-cols-2 items-end gap-x-2">
+          <div className="grid grid-cols-4 items-end gap-x-2">
             <FormField
               control={form.control}
               name="sensorId"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="col-span-3">
                   <FormLabel>Sensor id</FormLabel>
                   <FormControl>
                     <Input disabled placeholder="Sensor id" {...field} />
@@ -111,7 +117,9 @@ export const Streamer: React.FC = () => {
                 </FormItem>
               )}
             />
-            <Button onClick={handleGenerateId}>Generate id</Button>
+            <Button type="button" onClick={handleGenerateId}>
+              Generate id
+            </Button>
           </div>
 
           <FormField
@@ -128,14 +136,14 @@ export const Streamer: React.FC = () => {
             )}
           />
 
-          <Button type="submit">
+          <Button type="submit" className="self-end">
             {steamerService ? 'Stop' : 'Start capture'}
           </Button>
         </form>
       </Form>
       <video
+        className="border aspect-video w-100 max-w-2xl mt-2"
         ref={videoRef}
-        style={CAMERA_RESOLUTION}
         width={CAMERA_RESOLUTION.width}
         height={CAMERA_RESOLUTION.height}
         muted
