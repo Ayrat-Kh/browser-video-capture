@@ -7,5 +7,6 @@ import { ConfigurationModule } from '../config/configuration.module';
 @Module({
   imports: [ConfigurationModule],
   providers: [StreamerService, StreamerGateway],
+  exports: [StreamerService],
 })
 export class StreamerModule {}

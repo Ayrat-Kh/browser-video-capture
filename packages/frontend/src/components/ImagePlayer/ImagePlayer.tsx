@@ -93,21 +93,19 @@ export const ImagePlayer: React.FC = () => {
             )}
           />
 
-          <div className="grid grid-cols-4 items-end gap-x-2">
-            <FormField
-              control={form.control}
-              name="sensorId"
-              render={({ field }) => (
-                <FormItem className="col-span-3">
-                  <FormLabel>Sensor id</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Sensor id" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+          <FormField
+            control={form.control}
+            name="sensorId"
+            render={({ field }) => (
+              <FormItem className="col-span-3">
+                <FormLabel>Sensor id</FormLabel>
+                <FormControl>
+                  <Input placeholder="Sensor id" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
           <Button type="submit" className="self-end">
             {player ? 'Stop' : 'Start playing'}
