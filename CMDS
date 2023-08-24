@@ -8,19 +8,28 @@ docker pull 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend
 docker run -d --name web-frontend -p 3000:3000 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend
 
 
-## backend
-yarn build:docker:backend:staging
-docker push 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-backend
-docker pull 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-backend
-docker kill web-backend
-docker rm web-backend
-docker run -d --name web-backend -v /home/ubuntu/photos:/home/ubuntu/photos -p 3001:3001 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-backend
+## backend-streamer
+yarn build:docker:backend:streamer:staging
+docker push 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-streamer-backend
+docker pull 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-streamer-backend
+docker kill webcam-streamer-backend
+docker rm webcam-streamer-backend
+docker run -d --name webcam-streamer-backend -v /home/ubuntu/photos:/home/ubuntu/photos -p 3001:3001 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-streamer-backend
 
-## helper
-docker logs web-backend
+docker logs webcam-streamer-backend
+
+## backend-visualizer
+yarn build:docker:backend:visualizer:staging
+docker push 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend
+docker pull 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend
+docker kill webcam-visualizer-backend
+docker rm webcam-visualizer-backend
+docker run -d --name webcam-visualizer-backend -v /home/ubuntu/photos:/home/ubuntu/photos -p 3002:3001 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend
+
+docker logs webcam-visualizer-backend
 
 ## SSH
-ssh -i "~/.ssh/airat-key.pem" ubuntu@ec2-100-24-12-229.compute-1.amazonaws.com
+ssh -i "~/.ssh/airat-key.pem" ubuntu@ec2-18-232-80-240.compute-1.amazonaws.com
 
 ## set url
 chrome://flags/#unsafely-treat-insecure-origin-as-secure
@@ -29,4 +38,4 @@ https://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@github.com/Ayrat-Kh/webcam-anal
 
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 935995184596.dkr.ecr.us-east-1.amazonaws.com
 
-http://ec2-100-24-12-229.compute-1.amazonaws.com:3000/
+ec2-18-232-80-240.compute-1.amazonaws.com

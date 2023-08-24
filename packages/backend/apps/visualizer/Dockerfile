@@ -13,8 +13,8 @@ COPY ./yarn.lock ./
 RUN yarn
 
 COPY ./packages/backend/tsconfig*.json ./packages/backend/
-COPY ./packages/backend/apps/streamer/tsconfig*.json ./packages/backend/apps/streamer/
-COPY ./packages/backend/apps/streamer/src ./packages/backend/apps/streamer/src
+COPY ./packages/backend/apps/visualizer/tsconfig*.json ./packages/backend/apps/visualizer/
+COPY ./packages/backend/apps/visualizer/src ./packages/backend/apps/visualizer/src
 COPY ./packages/common/src ./packages/common/src
 
 # Build application (produces dist/ folder)
@@ -47,4 +47,4 @@ COPY --from=development /app/packages/backend/dist/ ./dist/
 EXPOSE 3001
 
 # Start application
-CMD [ "node", "dist/backend/apps/streamer/src/main.js" ]
+CMD [ "node", "dist/backend/apps/visualizer/src/main.js" ]
