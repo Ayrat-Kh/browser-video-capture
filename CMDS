@@ -1,18 +1,18 @@
 ## frontend
 
-yarn build:docker:frontend:staging && docker push 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend
+yarn build:docker:frontend:staging || docker push 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend
 docker stop web-frontend && docker rm web-frontend && docker pull 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend && docker run -d --name web-frontend -p 3000:3000 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend
 
 
 ## backend-streamer
 yarn build:docker:backend:streamer:staging && docker push 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-streamer-backend
-docker pull 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-streamer-backend && docker kill webcam-streamer-backend && docker rm webcam-streamer-backend && docker run -d --name webcam-streamer-backend -v /home/ubuntu/photos:/home/ubuntu/photos -p 3001:3001 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-streamer-backend
+docker pull 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-streamer-backend; docker kill webcam-streamer-backend; docker rm webcam-streamer-backend; docker run -d --name webcam-streamer-backend -v /home/ubuntu/photos:/home/ubuntu/photos -p 3001:3001 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-streamer-backend
 
 docker logs webcam-streamer-backend
 
 ## backend-visualizer
 yarn build:docker:backend:visualizer:staging && docker push 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend
-docker pull 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend && docker kill webcam-visualizer-backend && docker rm webcam-visualizer-backend && docker run -d --name webcam-visualizer-backend -v /home/ubuntu/photos:/home/ubuntu/photos -p 3002:3001 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend
+docker pull 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend; docker kill webcam-visualizer-backend; docker rm webcam-visualizer-backend; docker run -d --name webcam-visualizer-backend -v /home/ubuntu/photos:/home/ubuntu/photos -p 3002:3001 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend
 
 docker logs webcam-visualizer-backend
 

@@ -9,6 +9,7 @@ import { ConfigurationService } from '../config/configuration.service';
 @Injectable()
 export class VisualizerService {
   #latestImageFile = new Map<string, Buffer>();
+  #loaders = new Map<string, boolean>();
 
   constructor(private readonly configurationService: ConfigurationService) {
     this.handleImageChange = this.handleImageChange.bind(this);
@@ -32,7 +33,16 @@ export class VisualizerService {
     return this.#latestImageFile.get(id);
   }
 
-  async #loadLatestImageFileName(identifier: ChunkIdentifier): Promise<void> {
+  async #loadLatestImageFileName(
+    identifier: ChunkIdentifier,
+    force = false,
+  ): Promise<void> {
+    if (this.#loaders.get(identifierToString(identifier))) {
+      return;
+    }
+
+    this.#loaders.set(identifierToString(identifier), true);
+
     try {
       const folderPath = join(
         this.configurationService.get('contentFolder'),
@@ -49,30 +59,25 @@ export class VisualizerService {
 
       const id = identifierToString(identifier);
 
-      if (!this.#latestImageFile.has(id)) {
+      if (force || !this.#latestImageFile.has(id)) {
         this.#latestImageFile.set(id, file);
       }
     } catch (e) {
       console.error('loadLatestImageFileName error', e);
+    } finally {
+      this.#loaders.set(identifierToString(id), false);
     }
   }
 
   private async handleImageChange(fullFilename: string) {
-    try {
-      const [, sensorId, organizationId] =
-        fullFilename?.split('/')?.reverse() ?? [];
+    const [, sensorId, organizationId] =
+      fullFilename?.split('/')?.reverse() ?? [];
 
-      const file = await readFile(fullFilename);
+    const id = {
+      organizationId,
+      sensorId,
+    };
 
-      this.#latestImageFile.set(
-        identifierToString({
-          organizationId,
-          sensorId,
-        }),
-        file,
-      );
-    } catch (e) {
-      console.error('handleImageChange error', e);
-    }
+    await this.#loadLatestImageFileName(id, true);
   }
 }
