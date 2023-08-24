@@ -14,3 +14,8 @@ export interface WebSocketConnectParams {
   sensorName: string;
   organizationId: string;
 }
+
+export type ChunkIdentifier = Pick<
+  StreamVideoChunkParams,
+  "organizationId" | "sensorId"
+>;

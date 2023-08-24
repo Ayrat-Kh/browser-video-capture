@@ -7,11 +7,13 @@ import { ConfigurationService } from '../config/configuation.service';
 
 @Injectable()
 export class VisualizerService {
+  #latestImageFile = new Map<string, Buffer>();
+
   constructor(private readonly configurationService: ConfigurationService) {}
 
-  // public getImageChunk(sensorId: string): Buffer {
-  //   return this.#latestImageFile.get(sensorId);
-  // }
+  public getImageChunk(sensorId: string): Buffer {
+    return this.#latestImageFile.get(sensorId);
+  }
 
   async #initSensorImageFolder(sensorId: string) {
     const path = join(this.configurationService.get('contentFolder'), sensorId);

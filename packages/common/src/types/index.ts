@@ -1,2 +1,2 @@
-export * from "./chunk";
-export * from "./ping";
+export type * from "./chunk";
+export type * from "./ping";

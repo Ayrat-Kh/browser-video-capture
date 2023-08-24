@@ -1,1 +1,1 @@
-export * from "./stream-chunk";
+export type * from "./stream-chunk";

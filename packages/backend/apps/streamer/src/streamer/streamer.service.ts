@@ -6,11 +6,13 @@ import { join } from 'node:path';
 import { Injectable } from '@nestjs/common';
 import * as ffmpegPath from 'ffmpeg-static';
 
-import type { StreamVideoChunkParams } from '@webcam/common';
+import {
+  type StreamVideoChunkParams,
+  ChunkIdentifier,
+  identifierToString,
+} from '@webcam/common';
 import { ConfigurationService } from '../config/configuration.service';
 import { createWriteStream } from 'node:fs';
-
-type Identifier = Pick<StreamVideoChunkParams, 'organizationId' | 'sensorId'>;
 
 @Injectable()
 export class StreamerService {
@@ -30,23 +32,21 @@ export class StreamerService {
       chunk: Buffer;
     },
   ): Promise<void> {
-    const encoder = this.#encoders.get(this.#identifierToString(data));
+    const encoder = this.#encoders.get(identifierToString(data));
     encoder.stdin.write(data.chunk);
 
     return Promise.resolve();
   }
 
-  public getFirstFlvChunk(identifier: Identifier): Buffer {
-    return this.#realtimeVideoFirstChunks.get(
-      this.#identifierToString(identifier),
-    );
+  public getFirstFlvChunk(identifier: ChunkIdentifier): Buffer {
+    return this.#realtimeVideoFirstChunks.get(identifierToString(identifier));
   }
 
   public subscribeToVideoStream(
-    identifier: Identifier,
+    identifier: ChunkIdentifier,
     listener: (chunk: Buffer) => void,
   ) {
-    const id = this.#identifierToString(identifier);
+    const id = identifierToString(identifier);
 
     if (!this.#realtimeVideoEmitters.has(id)) {
       const ee = new EventEmitter({ captureRejections: false });
@@ -59,10 +59,10 @@ export class StreamerService {
   }
 
   public unsubscribeFromVideoStream(
-    identifier: Identifier,
+    identifier: ChunkIdentifier,
     listener: (chunk: Buffer) => void,
   ) {
-    const id = this.#identifierToString(identifier);
+    const id = identifierToString(identifier);
 
     if (!this.#realtimeVideoEmitters.has(id)) {
       return;
@@ -75,7 +75,7 @@ export class StreamerService {
     }
   }
 
-  public initEncoder(identifier: Identifier): Promise<ChildProcess> {
+  public initEncoder(identifier: ChunkIdentifier): Promise<ChildProcess> {
     this.resetEncoder(identifier);
 
     console.log(
@@ -119,17 +119,17 @@ export class StreamerService {
       this.#sendImage(identifier, image);
     });
 
-    this.#encoders.set(this.#identifierToString(identifier), ffmpegProcess);
+    this.#encoders.set(identifierToString(identifier), ffmpegProcess);
 
     return Promise.resolve(ffmpegProcess);
   }
 
-  resetEncoder(identifier: Identifier) {
+  resetEncoder(identifier: ChunkIdentifier) {
     console.log(
       `Org id: ${identifier.organizationId} SensorId: ${identifier.sensorId}: reset encoder`,
     );
 
-    const id = this.#identifierToString(identifier);
+    const id = identifierToString(identifier);
 
     if (this.#encoders.has(id)) {
       const ffmpegProcess = this.#encoders.get(id);
@@ -142,7 +142,7 @@ export class StreamerService {
     this.#realtimeVideoEmitters?.delete(id);
   }
 
-  async initSensorImageFolder(identifier: Identifier) {
+  async initSensorImageFolder(identifier: ChunkIdentifier) {
     const path = this.#identifierToPath(identifier);
 
     try {
@@ -156,24 +156,24 @@ export class StreamerService {
     }
   }
 
-  #initFirstChunk(identifier: Identifier, chunk: Buffer) {
-    const id = this.#identifierToString(identifier);
+  #initFirstChunk(identifier: ChunkIdentifier, chunk: Buffer) {
+    const id = identifierToString(identifier);
     if (!this.#realtimeVideoFirstChunks.has(id)) {
       this.#realtimeVideoFirstChunks.set(id, chunk);
     }
   }
 
-  #sendChunk(identifier: Identifier, chunk: Buffer) {
-    const id = this.#identifierToString(identifier);
+  #sendChunk(identifier: ChunkIdentifier, chunk: Buffer) {
+    const id = identifierToString(identifier);
     if (this.#realtimeVideoEmitters.has(id)) {
       this.#realtimeVideoEmitters.get(id).emit('chunk', chunk);
     }
   }
 
-  #sendImage(identifier: Identifier, chunk: Buffer) {
+  #sendImage(identifier: ChunkIdentifier, chunk: Buffer) {
     const BUFFER_SIZE = 65_536; // ffmpeg max buf size id 65_536 if we go above we should concat several sections
 
-    const id = this.#identifierToString(identifier);
+    const id = identifierToString(identifier);
     let latestBuffer = this.#upcomingLatestImageFile.get(id);
     if (latestBuffer?.byteLength % BUFFER_SIZE === 0) {
       latestBuffer = Buffer.concat([latestBuffer, chunk]);
@@ -187,6 +187,10 @@ export class StreamerService {
       return;
     }
 
+    if (!latestBuffer.includes('JFIF')) {
+      return;
+    }
+
     // save image to folder
     const filePath = join(
       this.#identifierToPath(identifier),
@@ -196,11 +200,7 @@ export class StreamerService {
     createWriteStream(filePath).write(latestBuffer);
   }
 
-  #identifierToString({ organizationId, sensorId }: Identifier): string {
-    return `${organizationId}_${sensorId}`;
-  }
-
-  #identifierToPath(identifier: Identifier): string {
+  #identifierToPath(identifier: ChunkIdentifier): string {
     return join(
       this.configurationService.get('contentFolder'),
       identifier.organizationId,
