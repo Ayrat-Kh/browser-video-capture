@@ -10,6 +10,8 @@ async function bootstrap() {
   });
 
   const configService: ConfigurationService = app.get(ConfigurationService);
+  console.log('config', JSON.stringify(configService, null, 2));
+
   app.get(VisualizerService);
 
   await app.listen(configService.get('appPort'));

@@ -47,7 +47,7 @@ export class CameraStreamService {
     this.#socket.connect();
 
     this.#socket.on(VIDEO_WS_EVENTS.LATEST_IMAGE, this.handleRequestData);
-    this.#timer = setInterval(this.handleRequest, 50);
+    this.#timer = setInterval(this.handleRequest, 75);
 
     return this;
   }

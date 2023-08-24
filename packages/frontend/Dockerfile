@@ -17,6 +17,8 @@ COPY ./packages/frontend/tsconfig*.json ./packages/frontend/
 COPY ./packages/frontend/src ./packages/frontend/src
 COPY ./packages/frontend/index.html ./packages/frontend/index.html
 COPY ./packages/frontend/vite.config.ts ./packages/frontend/vite.config.ts
+COPY ./packages/frontend/postcss.config.js ./packages/frontend/postcss.config.js
+COPY ./packages/frontend/tailwind.config.js ./packages/frontend/tailwind.config.js
 COPY ./packages/common/src ./packages/common/src
 
 ARG ENV_MODE
