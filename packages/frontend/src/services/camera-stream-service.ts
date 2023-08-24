@@ -69,6 +69,10 @@ export class CameraStreamService {
   }
 
   private async handleRequestData(chunk: ArrayBuffer) {
+    if (!chunk) {
+      return;
+    }
+
     try {
       const bitmap = await createImageBitmap(
         new Blob([chunk], { type: 'image/jpeg' }),

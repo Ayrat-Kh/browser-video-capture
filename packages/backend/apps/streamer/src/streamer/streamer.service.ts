@@ -1,16 +1,15 @@
 import { spawn, type ChildProcess } from 'node:child_process';
-import { mkdir, stat } from 'node:fs/promises';
+import { mkdir, stat, writeFile } from 'node:fs/promises';
 import { EventEmitter } from 'node:stream';
 import { join } from 'node:path';
-import { createWriteStream } from 'node:fs';
 import { Injectable } from '@nestjs/common';
 import * as ffmpegPath from 'ffmpeg-static';
 
 import {
   type StreamVideoChunkParams,
-  ChunkIdentifier,
+  type ChunkIdentifier,
   identifierToString,
-} from '@webcam/common';
+} from '@common';
 import { ConfigurationService } from '../config/configuration.service';
 
 @Injectable()
@@ -32,7 +31,7 @@ export class StreamerService {
     },
   ): Promise<void> {
     const encoder = this.#encoders.get(identifierToString(data));
-    encoder.stdin.write(data.chunk);
+    encoder.stdin?.write(data.chunk);
 
     return Promise.resolve();
   }
@@ -89,7 +88,7 @@ export class StreamerService {
 
         // image
         ...['-c:v', 'mjpeg'],
-        ...['-qscale:v', '4'],
+        ...['-qscale:v', '5'],
         ...['-vf', 'fps=20'],
         ...['-pix_fmt', 'yuvj420p'],
         ...['-f', 'image2pipe'],
@@ -169,7 +168,7 @@ export class StreamerService {
     }
   }
 
-  #sendImage(identifier: ChunkIdentifier, chunk: Buffer) {
+  async #sendImage(identifier: ChunkIdentifier, chunk: Buffer) {
     const BUFFER_SIZE = 65_536; // ffmpeg max buf size id 65_536 if we go above we should concat several sections
 
     const id = identifierToString(identifier);
@@ -196,7 +195,7 @@ export class StreamerService {
       `${new Date().getTime()}.jpg`,
     );
 
-    createWriteStream(filePath).write(latestBuffer);
+    await writeFile(filePath, latestBuffer);
   }
 
   #identifierToPath(identifier: ChunkIdentifier): string {

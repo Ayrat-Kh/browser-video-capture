@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "moduleResolution": "NodeNext",
     "target": "ES5",
     "useDefineForClassFields": true,
     "module": "ESNext",
@@ -9,10 +8,6 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "paths": {
-      "src/*": ["src/*"]
-    },
-    "baseUrl": "./",
     "composite": true
   }
 }

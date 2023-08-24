@@ -1,5 +1,6 @@
 import {
   OnGatewayConnection,
+  OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
@@ -16,8 +17,16 @@ import { StreamerService } from './streamer.service';
   namespace: CAMERA_CAPTURE_NS,
   cors: true,
 })
-export class StreamerGateway implements OnGatewayConnection {
+export class StreamerGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
   constructor(private readonly cameraCaptureService: StreamerService) {}
+  handleDisconnect(client: Socket) {
+    const query = client.handshake.query as unknown as WebSocketConnectParams;
+    if (query.isRecorder === 'yes') {
+      this.cameraCaptureService.resetEncoder(query);
+    }
+  }
 
   async handleConnection(client: Socket) {
     const query = client.handshake.query as unknown as WebSocketConnectParams;

@@ -51,10 +51,6 @@ export const ImagePlayer: React.FC = () => {
 
     streamer.initialize();
 
-    return () => {
-      streamer.close();
-    };
-
     setPlayer(streamer);
   };
 
@@ -113,7 +109,7 @@ export const ImagePlayer: React.FC = () => {
         </form>
       </Form>
       <canvas
-        style={CAMERA_RESOLUTION}
+        className="border aspect-video w-100 max-w-2xl mt-2"
         width={CAMERA_RESOLUTION.width}
         height={CAMERA_RESOLUTION.height}
         ref={canvasRef}

@@ -1,4 +1,4 @@
-import { ChunkIdentifier } from "src/types/chunk";
+import { ChunkIdentifier } from "../types";
 
 export const identifierToString = ({
   organizationId,
