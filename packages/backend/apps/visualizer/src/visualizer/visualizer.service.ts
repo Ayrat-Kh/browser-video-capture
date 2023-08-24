@@ -65,7 +65,7 @@ export class VisualizerService {
     } catch (e) {
       console.error('loadLatestImageFileName error', e);
     } finally {
-      this.#loaders.set(identifierToString(id), false);
+      this.#loaders.set(identifierToString(identifier), false);
     }
   }
 
