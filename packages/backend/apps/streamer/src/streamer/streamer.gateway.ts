@@ -3,12 +3,13 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
+import { Socket } from 'socket.io';
+
 import {
   CAMERA_CAPTURE_NS,
   VIDEO_WS_EVENTS,
   WebSocketConnectParams,
 } from '@common';
-import { Socket } from 'socket.io';
 import { StreamerService } from './streamer.service';
 
 @WebSocketGateway({

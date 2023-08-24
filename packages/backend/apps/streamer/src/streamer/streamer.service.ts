@@ -2,7 +2,7 @@ import { spawn, type ChildProcess } from 'node:child_process';
 import { mkdir, stat } from 'node:fs/promises';
 import { EventEmitter } from 'node:stream';
 import { join } from 'node:path';
-
+import { createWriteStream } from 'node:fs';
 import { Injectable } from '@nestjs/common';
 import * as ffmpegPath from 'ffmpeg-static';
 
@@ -12,7 +12,6 @@ import {
   identifierToString,
 } from '@webcam/common';
 import { ConfigurationService } from '../config/configuration.service';
-import { createWriteStream } from 'node:fs';
 
 @Injectable()
 export class StreamerService {

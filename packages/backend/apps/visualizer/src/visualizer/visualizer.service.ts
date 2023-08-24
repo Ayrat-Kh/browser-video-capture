@@ -1,60 +1,59 @@
-import { mkdir, stat } from 'node:fs/promises';
+import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-
+import { type WatchEventType, watch } from 'node:fs';
 import { Injectable } from '@nestjs/common';
 
+import { ChunkIdentifier, identifierToString } from '@common';
 import { ConfigurationService } from '../config/configuation.service';
 
 @Injectable()
 export class VisualizerService {
   #latestImageFile = new Map<string, Buffer>();
 
-  constructor(private readonly configurationService: ConfigurationService) {}
-
-  public getImageChunk(sensorId: string): Buffer {
-    return this.#latestImageFile.get(sensorId);
+  constructor(private readonly configurationService: ConfigurationService) {
+    watch(
+      configurationService.get('contentFolder'),
+      undefined,
+      this.#handleImageChange,
+    );
   }
 
-  async #initSensorImageFolder(sensorId: string) {
-    const path = join(this.configurationService.get('contentFolder'), sensorId);
+  public async getImageChunk(identifier: ChunkIdentifier): Promise<Buffer> {
+    const id = identifierToString(identifier);
 
+    if (!this.#latestImageFile.has(id)) {
+      await this.#loadLatestImageFileName(identifier);
+    }
+
+    return this.#latestImageFile.get(id);
+  }
+
+  async #loadLatestImageFileName(identifier: ChunkIdentifier): Promise<void> {
     try {
-      if ((await stat(path)).isDirectory()) {
-        return;
+      const folderPath = join(
+        this.configurationService.get('contentFolder'),
+        identifier.organizationId,
+        identifier.sensorId,
+      );
+
+      const [latestFile] = (await readdir(folderPath))
+        .map((x) => ({ time: Number.parseInt(x), name: x }))
+        .filter((x) => Number.isFinite(x))
+        .sort((a, b) => b.time - a.time);
+
+      const file = await readFile(join(folderPath, latestFile.name));
+
+      const id = identifierToString(identifier);
+
+      if (!this.#latestImageFile.has(id)) {
+        this.#latestImageFile.set(id, file);
       }
     } catch (e) {
-      await mkdir(path, {
-        recursive: true,
-      });
+      return;
     }
   }
 
-  // #initFirstChunk(sensorId: string, chunk: Buffer) {
-  //   if (!this.#realtimeVideoFirstChunks.has(sensorId)) {
-  //     this.#realtimeVideoFirstChunks.set(sensorId, chunk);
-  //   }
-  // }
-
-  // #sendChunk(sensorId: string, chunk: Buffer) {
-  //   if (this.#realtimeVideoEmitters.has(sensorId)) {
-  //     this.#realtimeVideoEmitters.get(sensorId).emit('chunk', chunk);
-  //   }
-  // }
-
-  // #sendImage(sensorId: string, chunk: Buffer) {
-  //   let latestBuffer = this.#upcomingLatestImageFile.get(sensorId);
-  //   if (latestBuffer?.byteLength % 65_536 === 0) {
-  //     latestBuffer = Buffer.concat([latestBuffer, chunk]);
-  //   } else {
-  //     latestBuffer = chunk;
-  //   }
-
-  //   this.#upcomingLatestImageFile.set(sensorId, chunk);
-
-  //   if (chunk.byteLength === 65_536) {
-  //     return;
-  //   }
-
-  //   this.#latestImageFile.set(sensorId, latestBuffer);
-  // }
+  #handleImageChange(event: WatchEventType, filename: string) {
+    console.log('filename', filename);
+  }
 }

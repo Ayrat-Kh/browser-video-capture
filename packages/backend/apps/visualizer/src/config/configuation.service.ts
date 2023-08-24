@@ -7,7 +7,9 @@ import { TConfiguration } from './configuration';
 export class ConfigurationService {
   constructor(private readonly configService: ConfigService) {}
 
-  public get<TReturn = string>(propName: keyof TConfiguration): TReturn {
-    return this.configService.get(propName) as TReturn;
+  public get<TKey extends keyof TConfiguration>(
+    propName: TKey,
+  ): TConfiguration[TKey] {
+    return this.configService.get(propName) as TConfiguration[TKey];
   }
 }
