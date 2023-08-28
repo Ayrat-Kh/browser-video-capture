@@ -1,13 +1,18 @@
 import { Module } from '@nestjs/common';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 
-import { StreamerModule } from './streamer/streamer.module';
+import { VideoCaptureModule } from './video-capture/video-capture.module';
 import { PingModule } from './ping/ping.module';
 import { ConfigurationModule } from './config/configuration.module';
-import { PlayerModule } from './player/player.module';
+import { ProvidersModule } from './providers/ProvidersModule';
 
 @Module({
-  imports: [PingModule, StreamerModule, ConfigurationModule, PlayerModule],
-  controllers: [],
-  providers: [],
+  imports: [
+    ProvidersModule,
+    PingModule,
+    VideoCaptureModule,
+    ConfigurationModule,
+    EventEmitterModule.forRoot(),
+  ],
 })
 export class AppModule {}

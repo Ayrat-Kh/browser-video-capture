@@ -7,9 +7,8 @@
     "build": "nest build",
     "format": "prettier --write \"apps/**/*.ts\"",
     "---- streamer ----": "",
-    "start:streamer:dev": "CONTENT_FOLDER='/home/red-tech/dev/public' APP_PORT=3001 nest start streamer --watch",
-    "start:streamer:debug": "CONTENT_FOLDER='/home/red-tech/dev/public' APP_PORT=3001 nest start streamer --debug --watch",
-    "start:streamer:build": "CONTENT_FOLDER='/home/red-tech/dev/public' APP_PORT=3001 node ./dist/backend/apps/streamer/src/main.js",
+    "start:streamer:dev": "IMAGE_SOCKET_SERVER_URL='ws://localhost:3002' CONTENT_FOLDER='/home/red-tech/dev/public' APP_PORT=3001 nest start streamer --watch",
+    "start:streamer:debug": "IMAGE_SOCKET_SERVER_URL='ws://localhost:3002' CONTENT_FOLDER='/home/red-tech/dev/public' APP_PORT=3001 nest start streamer --debug --watch",
     "---- player ----": "",
     "start:visualizer:dev": "CONTENT_FOLDER='/home/red-tech/dev/public' APP_PORT=3002 nest start visualizer --watch",
     "start:visualizer:debug": "CONTENT_FOLDER='/home/red-tech/dev/public' APP_PORT=3002 nest start visualizer --debug --watch",
@@ -25,6 +24,8 @@
     "@nestjs/common": "^10.0.0",
     "@nestjs/config": "^3.0.0",
     "@nestjs/core": "^10.0.0",
+    "@nestjs/event-emitter": "^2.0.2",
+    "@nestjs/microservices": "^10.2.2",
     "@nestjs/platform-express": "^10.0.0",
     "@nestjs/platform-socket.io": "^10.2.0",
     "@nestjs/websockets": "^10.1.0",
@@ -32,7 +33,8 @@
     "ffmpeg-static": "^5.2.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
-    "socket.io": "^4.7.2"
+    "socket.io": "^4.7.2",
+    "socket.io-client": "^4.7.2"
   },
   "devDependencies": {
     "@nestjs/cli": "^10.0.1",

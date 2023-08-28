@@ -4,27 +4,27 @@ import {
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
+import { Inject } from '@nestjs/common';
 import { Socket } from 'socket.io';
 
-import {
-  CAMERA_CAPTURE_NS,
-  VIDEO_WS_EVENTS,
-  WebSocketConnectParams,
-} from '@common';
-import { StreamerService } from './streamer.service';
+import { VIDEO_WS_EVENTS, WS_NS, WebSocketConnectParams } from '@common';
+import { VideoCaptureService } from './video-capture.service';
 
 @WebSocketGateway({
-  namespace: CAMERA_CAPTURE_NS,
+  namespace: WS_NS.VIDEO_CAPTURE,
   cors: true,
+  transports: ['websocket'],
 })
-export class StreamerGateway
+export class VideoCaptureGateway
   implements OnGatewayConnection, OnGatewayDisconnect
 {
-  constructor(private readonly cameraCaptureService: StreamerService) {}
+  @Inject(VideoCaptureService)
+  private readonly videoCaptureService: VideoCaptureService;
+
   handleDisconnect(client: Socket) {
     const query = client.handshake.query as unknown as WebSocketConnectParams;
     if (query.isRecorder === 'yes') {
-      this.cameraCaptureService.resetEncoder(query);
+      this.videoCaptureService.resetEncoder(query);
     }
   }
 
@@ -32,8 +32,7 @@ export class StreamerGateway
     const query = client.handshake.query as unknown as WebSocketConnectParams;
 
     if (query.isRecorder === 'yes') {
-      await this.cameraCaptureService.initEncoder(query);
-      await this.cameraCaptureService.initSensorImageFolder(query);
+      await this.videoCaptureService.initEncoder(query);
     }
   }
 
@@ -41,7 +40,7 @@ export class StreamerGateway
   async uploadVideoChunk(client: Socket, chunk: Buffer): Promise<boolean> {
     const query = client.handshake.query as unknown as WebSocketConnectParams;
 
-    await this.cameraCaptureService.saveChunk({
+    await this.videoCaptureService.saveChunk({
       chunk,
       ...query,
     });

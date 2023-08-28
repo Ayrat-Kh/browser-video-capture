@@ -1,29 +1,23 @@
-import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
-
 import {
-  CAMERA_CAPTURE_NS,
-  VIDEO_WS_EVENTS,
-  WebSocketConnectParams,
-} from '@common';
-import { VisualizerService } from './visualizer.service';
+  OnGatewayConnection,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
+import { Server, Socket } from 'socket.io';
+
+import { WS_NS, WebSocketConnectParams, identifierToString } from '@common';
 
 @WebSocketGateway({
-  namespace: CAMERA_CAPTURE_NS,
+  namespace: WS_NS.STREAMER,
   cors: true,
 })
-export class VisualizerGateway {
-  constructor(private readonly cameraCaptureService: VisualizerService) {}
+export class VisualizerGateway implements OnGatewayConnection {
+  @WebSocketServer()
+  public server: Server;
 
-  @SubscribeMessage(VIDEO_WS_EVENTS.LATEST_IMAGE_REQUEST)
-  async subscribeLatestImage(client: Socket) {
+  public handleConnection(client: Socket) {
     const query = client.handshake.query as unknown as WebSocketConnectParams;
 
-    client
-      .compress(true)
-      .emit(
-        VIDEO_WS_EVENTS.LATEST_IMAGE,
-        await this.cameraCaptureService.getImageChunk(query),
-      );
+    client.join(identifierToString(query));
   }
 }

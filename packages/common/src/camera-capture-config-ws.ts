@@ -1,7 +1,11 @@
-export const CAMERA_CAPTURE_NS = "/recorder";
+export const WS_NS = {
+  VIDEO_CAPTURE: "/VIDEO_CAPTURE",
+  STREAMER: "/STREAMER",
+  STREAMER_PROVIDER: "/STREAMER_PROVIDER",
+} as const;
 
 export const VIDEO_WS_EVENTS = {
-  UPLOAD_CHUNK: "stream-chunk.upload",
-  LATEST_IMAGE_REQUEST: "stream-chunk.download-latest-image-request",
-  LATEST_IMAGE: "stream-chunk.download-latest-image",
+  UPLOAD_CHUNK: "video-capture.upload",
+  IMAGE_PROVIDER: "streamer-provider.image",
+  IMAGE: "streamer.image",
 } as const;

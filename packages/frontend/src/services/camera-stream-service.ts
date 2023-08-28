@@ -1,8 +1,4 @@
-import {
-  CAMERA_CAPTURE_NS,
-  VIDEO_WS_EVENTS,
-  WebSocketConnectParams,
-} from '@webcam/common';
+import { VIDEO_WS_EVENTS, WS_NS, WebSocketConnectParams } from '@webcam/common';
 
 import { PLAYER_SOCKET_URL } from 'src/constants/Config';
 import { Socket, io } from 'socket.io-client';
@@ -26,9 +22,9 @@ export class CameraStreamService {
     this.#organizationId = organizationId;
     this.#sensorId = sensorId;
 
-    this.#socket = io(`${PLAYER_SOCKET_URL}${CAMERA_CAPTURE_NS}`, {
+    this.#socket = io(`${PLAYER_SOCKET_URL}${WS_NS.STREAMER}`, {
       autoConnect: false,
-      protocols: ['websocket'],
+      transports: ['websocket'],
       query: {
         isRecorder: 'no',
         sensorId: this.#sensorId,
@@ -46,26 +42,30 @@ export class CameraStreamService {
 
     this.#socket.connect();
 
-    this.#socket.on(VIDEO_WS_EVENTS.LATEST_IMAGE, this.handleRequestData);
-    this.#timer = setInterval(this.handleRequest, 75);
+    this.#socket.on(VIDEO_WS_EVENTS.IMAGE, this.handleRequest);
 
     return this;
   }
 
   public close(): Promise<CameraStreamService> {
-    this.#socket?.off(VIDEO_WS_EVENTS.LATEST_IMAGE, this.handleRequestData);
+    this.#socket?.off(VIDEO_WS_EVENTS.IMAGE, this.handleRequest);
     this.#socket?.close();
     clearInterval(this.#timer);
 
     return Promise.resolve(this);
   }
 
-  private async handleRequest() {
+  private async handleRequest(chunk: ArrayBuffer, callback: VoidFunction) {
     if (this.#isFetching) {
+      callback?.();
       return;
     }
+
     this.#isFetching = true;
-    this.#socket.emit(VIDEO_WS_EVENTS.LATEST_IMAGE_REQUEST);
+    await this.handleRequestData(chunk);
+    this.#isFetching = false;
+
+    callback?.();
   }
 
   private async handleRequestData(chunk: ArrayBuffer) {

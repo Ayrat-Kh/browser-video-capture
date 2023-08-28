@@ -1,7 +1,9 @@
+import { Socket, io } from 'socket.io-client';
+
 import {
   CAMERA_FRAME_RATE_MSEC,
   CAMERA_RESOLUTION,
-  CAMERA_CAPTURE_NS,
+  WS_NS,
   VIDEO_WS_EVENTS,
   WebSocketConnectParams,
 } from '@webcam/common';
@@ -11,7 +13,6 @@ import {
   STREAMER_SOCKET_URL,
 } from 'src/constants/Config';
 import { streamerPing } from './api/ping-api';
-import { Socket, io } from 'socket.io-client';
 
 interface CameraRecorderServiceParams {
   makeTestApi?: boolean;
@@ -39,9 +40,9 @@ export class CameraRecorderService {
     this.#sensorId = sensorId;
     this.#sensorName = sensorName;
 
-    this.#socket = io(`${STREAMER_SOCKET_URL}${CAMERA_CAPTURE_NS}`, {
+    this.#socket = io(`${STREAMER_SOCKET_URL}${WS_NS.VIDEO_CAPTURE}`, {
       autoConnect: false,
-      protocols: ['websocket'],
+      transports: ['websocket'],
       query: {
         sensorId: this.#sensorId,
         sensorName: this.#sensorName,
@@ -75,6 +76,7 @@ export class CameraRecorderService {
       audio: false,
       video: {
         ...CAMERA_RESOLUTION,
+
         frameRate: {
           min: 15,
           ideal: 20,
@@ -101,6 +103,10 @@ export class CameraRecorderService {
         this.#socket?.off('connect', resolveWrapper);
       };
       this.#socket?.on('connect', resolveWrapper);
+    });
+
+    this.#socket?.on('disconnect', () => {
+      this.close();
     });
 
     this.#recorder?.start(CAMERA_FRAME_RATE_MSEC);
