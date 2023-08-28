@@ -49,10 +49,9 @@ export class VideoCaptureService {
 
         // image
         ...['-c:v', 'mjpeg'],
-        ...['-qscale:v', '8'],
+        ...['-qscale:v', '6'],
         ...['-vf', 'fps=20'],
-        ...['-preset', 'ultrafast'],
-        ...['-crf', '28'],
+        // ...['-preset', 'ultrafast'],
         ...['-f', 'image2pipe'],
         'pipe:3',
       ],

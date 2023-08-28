@@ -109,7 +109,7 @@ export const ImagePlayer: React.FC = () => {
         </form>
       </Form>
       <canvas
-        className="border aspect-video w-100 max-w-2xl mt-2"
+        className="border aspect-video w-100 max-w-6xl mt-2"
         width={CAMERA_RESOLUTION.width}
         height={CAMERA_RESOLUTION.height}
         ref={canvasRef}
