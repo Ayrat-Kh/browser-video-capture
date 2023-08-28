@@ -49,7 +49,12 @@ export const Streamer: React.FC = () => {
       makeTestApi: true,
     });
 
-    await ss.initialize();
+    await ss.initialize({
+      async onStop() {
+        setSteamerService(null);
+      },
+    });
+
     await ss.start();
 
     const stream = ss.getStream();

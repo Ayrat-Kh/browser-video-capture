@@ -55,7 +55,9 @@ export class CameraRecorderService {
     this.handleDataAvailable = this.handleDataAvailable.bind(this);
   }
 
-  public async initialize(): Promise<CameraRecorderService> {
+  public async initialize(options?: {
+    onStop?: (service: CameraRecorderService) => void | Promise<void>;
+  }): Promise<CameraRecorderService> {
     await this.close();
 
     while (this.#makeTestApi) {
@@ -91,6 +93,11 @@ export class CameraRecorderService {
 
     this.#socket.connect();
 
+    this.#socket?.on('disconnect', async () => {
+      this.close();
+      await options?.onStop?.(this);
+    });
+
     this.#recorder.addEventListener('dataavailable', this.handleDataAvailable);
 
     return this;
@@ -103,10 +110,6 @@ export class CameraRecorderService {
         this.#socket?.off('connect', resolveWrapper);
       };
       this.#socket?.on('connect', resolveWrapper);
-    });
-
-    this.#socket?.on('disconnect', () => {
-      this.close();
     });
 
     this.#recorder?.start(CAMERA_FRAME_RATE_MSEC);
