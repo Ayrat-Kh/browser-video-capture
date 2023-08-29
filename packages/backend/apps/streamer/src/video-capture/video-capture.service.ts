@@ -50,9 +50,9 @@ export class VideoCaptureService {
 
         // image
         ...['-c:v', 'mjpeg'],
-        ...['-qscale:v', '6'],
+        ...['-qscale:v', '8'],
         ...['-vf', 'fps=20'],
-        // ...['-preset', 'ultrafast'],
+        ...['-preset', 'ultrafast'],
         ...['-f', 'image2pipe'],
         'pipe:3',
       ],
@@ -111,6 +111,8 @@ export class VideoCaptureService {
     if (!latestBuffer.includes('JFIF')) {
       return;
     }
+
+    this.logger.debug('size', latestBuffer.byteLength);
 
     this.eventEmitter.emit(
       VideoCaptureEvents.ImageCapture,

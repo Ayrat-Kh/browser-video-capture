@@ -1,7 +1,6 @@
 import { Socket, io } from 'socket.io-client';
 
 import {
-  CAMERA_FRAME_RATE_MSEC,
   CAMERA_RESOLUTION,
   WS_NS,
   VIDEO_WS_EVENTS,
@@ -111,7 +110,7 @@ export class CameraRecorderService {
       this.#socket?.on('connect', resolveWrapper);
     });
 
-    this.#recorder?.start(CAMERA_FRAME_RATE_MSEC);
+    this.#recorder?.start(20);
     return this;
   }
 

@@ -7,13 +7,13 @@
   "scripts": {
     "dev:frontend": "yarn workspace @webcam/frontend dev",
     "build:frontend": "yarn workspace @webcam/frontend build",
-    "build:docker:frontend:staging": "docker build --build-arg ENV_MODE=staging -t 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend -f ./packages/frontend/Dockerfile .",
+    "docker:frontend:staging": "docker build --build-arg ENV_MODE=staging -t 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend -f ./packages/frontend/Dockerfile .",
     "---- streamer-backend ----": "",
-    "start:streamer:dev": "yarn workspace @webcam/backend start:streamer:dev",
+    "dev:streamer": "yarn workspace @webcam/backend start:streamer:dev",
     "build:backend": "yarn workspace @webcam/backend build",
-    "build:docker:backend:streamer:staging": "docker build --build-arg CONTENT_FOLDER='/home/ubuntu/photos' -t 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-streamer-backend -f ./packages/backend/apps/streamer/Dockerfile .",
+    "docker:streamer:staging": "docker build --build-arg CONTENT_FOLDER='/home/ubuntu/photos' -t 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-streamer-backend -f ./packages/backend/apps/streamer/Dockerfile .",
     "---- streamer-player ----": "",
-    "start:visualizer:dev": "yarn workspace @webcam/backend start:visualizer:dev",
-    "build:docker:backend:visualizer:staging": "docker build --build-arg CONTENT_FOLDER='/home/ubuntu/photos' -t 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend -f ./packages/backend/apps/visualizer/Dockerfile ."
+    "dev:visualizer": "yarn workspace @webcam/backend start:visualizer:dev",
+    "docker:visualizer:staging": "docker build --build-arg CONTENT_FOLDER='/home/ubuntu/photos' -t 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend -f ./packages/backend/apps/visualizer/Dockerfile ."
   }
 }
