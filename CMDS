@@ -1,29 +1,45 @@
-## frontend
-
-yarn build:docker:frontend:staging || docker push 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend
+# FRONTEND
+### aws
+docker build --build-arg ENV_MODE=staging -t webcam-frontend -f ./packages/frontend/Dockerfile .
+docker tag webcam-frontend 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend && docker push 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend
 docker stop web-frontend && docker rm web-frontend && docker pull 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend && docker run -d --name web-frontend -p 3000:3000 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-frontend
 
+### docker hub
+docker build --build-arg ENV_MODE=staging -t webcam-frontend -f ./packages/frontend/Dockerfile .
+docker tag webcam-frontend ayratkhisamiev/test-repo-wc-frontend && docker push ayratkhisamiev/test-repo-wc-frontend
 
-## backend-streamer
-yarn build:docker:backend:streamer:staging && docker push 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-streamer-backend
+# BACKEND-STREAMER
+### aws
+docker build --build-arg IMAGE_SOCKET_SERVER_URL='wss://webcam-player.red-tech.cloud' -t webcam-streamer-backend -f ./packages/backend/apps/streamer/Dockerfile .
+docker tag webcam-streamer-backend 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-streamer-backend && docker push 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-streamer-backend
 docker pull 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-streamer-backend; docker kill webcam-streamer-backend; docker rm webcam-streamer-backend; docker run -d --name webcam-streamer-backend -v /home/ubuntu/photos:/home/ubuntu/photos -p 3001:3001 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-streamer-backend
 
+### docker hub
+docker build --build-arg IMAGE_SOCKET_SERVER_URL='wss://webcam-player.red-tech.cloud' -t webcam-streamer-backend -f ./packages/backend/apps/streamer/Dockerfile .
+docker tag webcam-streamer-backend ayratkhisamiev/test-repo-wc-streamer-backend && docker push ayratkhisamiev/test-repo-wc-streamer-backend
+
+### rest
 docker logs webcam-streamer-backend
 
-## backend-visualizer
-yarn build:docker:backend:visualizer:staging && docker push 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend
-docker pull 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend; docker kill webcam-visualizer-backend; docker rm webcam-visualizer-backend; docker run -d --name webcam-visualizer-backend -v /home/ubuntu/photos:/home/ubuntu/photos -p 3002:3001 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend
+# BACKEND-VISUALIZER
+### aws
+docker build -t webcam-streamer-backend -f ./packages/backend/apps/visualizer/Dockerfile .
+docker tag webcam-streamer-backend 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend && docker push 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend
+docker pull 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend; docker kill webcam-visualizer-backend; docker rm webcam-visualizer-backend; docker run -d --name webcam-visualizer-backend -v /home/ubuntu/photos:/home/ubuntu/photos -p 3002:3002 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend
 
+### docker hub
+docker build -t webcam-visualizer-backend -f ./packages/backend/apps/streamer/Dockerfile .
+docker tag webcam-visualizer-backend ayratkhisamiev/test-repo-wc-visualizer-backend && docker push ayratkhisamiev/test-repo-wc-visualizer-backend
+
+### rest
 docker logs webcam-visualizer-backend
 
-## SSH
-ssh -i "~/.ssh/airat-key.pem" ubuntu@ec2-18-232-80-240.compute-1.amazonaws.com
-
-## set url
-chrome://flags/#unsafely-treat-insecure-origin-as-secure
-
-https://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@github.com/Ayrat-Kh/webcam-analyzer.git
-
+# REST
 aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 935995184596.dkr.ecr.us-east-1.amazonaws.com
 
-ec2-18-232-80-240.compute-1.amazonaws.com
+# SSH
+ssh -i "~/.ssh/airat-key.pem" ubuntu@ec2-18-232-80-240.compute-1.amazonaws.com
+
+# SET URL
+chrome://flags/#unsafely-treat-insecure-origin-as-secure
+

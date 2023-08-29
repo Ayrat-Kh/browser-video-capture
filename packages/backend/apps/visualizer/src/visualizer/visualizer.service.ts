@@ -16,7 +16,7 @@ export class VisualizerService {
   constructor(private readonly configurationService: ConfigurationService) {
     this.handleImageChange = this.handleImageChange.bind(this);
 
-    const watcher = watch(configurationService.get('contentFolder'), {
+    const watcher = watch('', {
       ignoreInitial: true,
     }).on('add', this.handleImageChange);
 
@@ -47,7 +47,7 @@ export class VisualizerService {
 
     try {
       const folderPath = join(
-        this.configurationService.get('contentFolder'),
+        '',
         identifier.organizationId,
         identifier.sensorId,
       );

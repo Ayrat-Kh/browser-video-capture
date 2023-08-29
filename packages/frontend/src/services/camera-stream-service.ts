@@ -26,7 +26,7 @@ export class CameraStreamService {
       autoConnect: false,
       transports: ['websocket'],
       query: {
-        isRecorder: 'no',
+        sensorName: '',
         sensorId: this.#sensorId,
         organizationId: this.#organizationId,
       } as WebSocketConnectParams,
