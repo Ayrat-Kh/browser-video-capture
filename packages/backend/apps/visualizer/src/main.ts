@@ -2,14 +2,25 @@ import { NestFactory } from '@nestjs/core';
 
 import { AppModule } from './app.module';
 import { ConfigurationService } from './config/configuration.service';
+import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     cors: true,
+    logger: ['error', 'log', 'verbose'],
   });
 
+  const logger = new Logger('bootstrap');
+
   const configService = app.get<ConfigurationService>(ConfigurationService);
-  console.log('config', JSON.stringify(configService, null, 2));
+  const internals = configService as any;
+  logger.verbose(
+    `[config]: ${JSON.stringify(
+      internals.configService.internalConfig,
+      null,
+      2,
+    )}`,
+  );
 
   await app.listen(configService.get('appPort'));
 }

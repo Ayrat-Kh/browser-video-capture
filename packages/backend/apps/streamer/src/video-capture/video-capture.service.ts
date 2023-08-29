@@ -1,5 +1,5 @@
 import { spawn, type ChildProcess } from 'node:child_process';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as ffmpegPath from 'ffmpeg-static';
 
 import {
@@ -15,8 +15,9 @@ import {
 
 @Injectable()
 export class VideoCaptureService {
-  readonly #encoders = new Map<string, ChildProcess>();
+  private readonly logger = new Logger(VideoCaptureService.name);
 
+  readonly #encoders = new Map<string, ChildProcess>();
   readonly #upcomingLatestImages = new Map<string, Buffer>();
 
   constructor(private readonly eventEmitter: EventEmitter2) {}
@@ -37,7 +38,7 @@ export class VideoCaptureService {
   public initEncoder(identifier: ChunkIdentifier): Promise<ChildProcess> {
     this.resetEncoder(identifier);
 
-    console.log(
+    this.logger.log(
       `Org id: ${identifier.organizationId} SensorId: ${identifier.sensorId}: init encoder`,
     );
 
@@ -59,7 +60,10 @@ export class VideoCaptureService {
     );
 
     ffmpegProcess.on('close', (error: Buffer) => {
-      console.log('close:', error?.toString());
+      this.logger.error(
+        `[${identifierToString(identifier)}] closed encoder:`,
+        error?.toString(),
+      );
     });
 
     ffmpegProcess.stdio[3].on('data', (image: Buffer) => {
@@ -72,7 +76,7 @@ export class VideoCaptureService {
   }
 
   resetEncoder(identifier: ChunkIdentifier) {
-    console.log(
+    this.logger.log(
       `Org id: ${identifier.organizationId} SensorId: ${identifier.sensorId}: reset encoder`,
     );
 

@@ -1,6 +1,6 @@
 import { readFile, readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { watch } from 'chokidar';
 
 import { type ChunkIdentifier, identifierToString } from '@common';
@@ -8,6 +8,8 @@ import { ConfigurationService } from '../config/configuration.service';
 
 @Injectable()
 export class VisualizerService {
+  #logger = new Logger(VisualizerService.name);
+
   #latestImageFile = new Map<string, Buffer>();
   #loaders = new Map<string, boolean>();
 
@@ -63,7 +65,7 @@ export class VisualizerService {
         this.#latestImageFile.set(id, file);
       }
     } catch (e) {
-      console.error('loadLatestImageFileName error', e);
+      this.#logger.error('[#loadLatestImageFileName] error', e);
     } finally {
       this.#loaders.set(identifierToString(identifier), false);
     }

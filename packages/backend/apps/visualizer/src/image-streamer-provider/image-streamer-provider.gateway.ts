@@ -1,4 +1,5 @@
 import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import { Socket } from 'socket.io';
 
 import {
   ChunkIdentifier,
@@ -7,7 +8,6 @@ import {
   identifierToString,
 } from '@common';
 import { VisualizerGateway } from '../visualizer/visualizer.gateway';
-import { Socket } from 'socket.io';
 
 @WebSocketGateway({
   namespace: WS_NS.STREAMER_PROVIDER,
@@ -22,19 +22,13 @@ export class ImageStreamerProviderGateway {
     _socket: Socket,
     [id, image]: [id: ChunkIdentifier, data: Buffer],
   ): Promise<boolean> {
-    try {
-      await this.visualizerGateway.server
-        .to(identifierToString(id))
-        .compress(true)
-        .timeout(20_000)
-        .emitWithAck(VIDEO_WS_EVENTS.IMAGE, image);
-    } catch (e) {
-      console.error(
-        `${VIDEO_WS_EVENTS.IMAGE_PROVIDER} ${identifierToString(id)}`,
-        e,
-      );
-    } finally {
-      return true;
-    }
+    const identifier = identifierToString(id);
+
+    this.visualizerGateway.server
+      .to(identifier)
+      .volatile.compress(true)
+      .emit(VIDEO_WS_EVENTS.IMAGE, image);
+
+    return true;
   }
 }

@@ -9,7 +9,6 @@ export interface StreamVideoChunkResult {
 }
 
 export interface WebSocketConnectParams {
-  isRecorder: "yes" | "no"; // being send over http
   sensorId: string;
   sensorName: string;
   organizationId: string;

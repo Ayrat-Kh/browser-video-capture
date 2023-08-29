@@ -1,11 +1,14 @@
 import { CustomTransportStrategy, Server } from '@nestjs/microservices';
 
 import { ImageServiceSocketProvider } from './ImageServiceSocketProvider';
+import { Logger } from '@nestjs/common';
 
 export class ImageServiceSocketProviderStrategy
   extends Server
   implements CustomTransportStrategy
 {
+  loggerService = new Logger(ImageServiceSocketProviderStrategy.name);
+
   constructor(
     private readonly imageServiceSocketProvider: ImageServiceSocketProvider,
   ) {
@@ -16,14 +19,14 @@ export class ImageServiceSocketProviderStrategy
     const socket = this.imageServiceSocketProvider.connect();
 
     socket.on('connect', () => {
-      console.log('connected to image socket server');
+      this.loggerService.log('connected to image socket server');
     });
 
     socket.on('reconnect', () => {
-      console.log('reconnected to image socket server');
+      this.loggerService.log('reconnected to image socket server');
     });
     socket.on('error', (error) => {
-      console.error('FAILED: from image socket server', error);
+      this.loggerService.error('FAILED: from image socket server', error);
     });
 
     callback();
