@@ -120,7 +120,7 @@ export const Streamer: React.FC = () => {
                 <FormItem className="col-span-3">
                   <FormLabel>Sensor id</FormLabel>
                   <FormControl>
-                    <Input disabled placeholder="Sensor id" {...field} />
+                    <Input placeholder="Sensor id" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

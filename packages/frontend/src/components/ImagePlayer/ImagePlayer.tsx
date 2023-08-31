@@ -15,16 +15,18 @@ import {
   FormMessage,
 } from 'src/atoms/ui/form';
 import { Input } from 'src/atoms/ui/input';
+import { useSearchParams } from 'react-router-dom';
 
 const schema = z.object({
   sensorId: z.string().min(3, { message: 'Required' }),
-  sensorName: z.string().min(3, { message: 'Required' }),
   organizationId: z.string().min(3, { message: 'Required' }),
 });
 
 type Schema = TypeOf<typeof schema>;
 
 export const ImagePlayer: React.FC = () => {
+  const [searchParams] = useSearchParams();
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [player, setPlayer] = useState<CameraStreamService | null>(null);
 
@@ -34,6 +36,7 @@ export const ImagePlayer: React.FC = () => {
   const { reset: resetForm } = form;
 
   const handleCapture = async (values: Schema) => {
+    console.log('click');
     if (player) {
       player?.close();
       setPlayer(null);
@@ -55,6 +58,7 @@ export const ImagePlayer: React.FC = () => {
   };
 
   useEffect(() => {
+    console.log('click');
     try {
       const item = localStorage.getItem('session');
 
@@ -67,6 +71,24 @@ export const ImagePlayer: React.FC = () => {
       // do nothing
     }
   }, [resetForm]);
+
+  useEffect(() => {
+    console.log('click1');
+    const organizationId = searchParams.get('organizationId');
+    const sensorId = searchParams.get('sensorId');
+
+    if (sensorId && organizationId) {
+      const values = {
+        organizationId,
+        sensorId,
+        sensorName: '',
+      } as Schema;
+
+      resetForm(values);
+      localStorage.setItem('session', JSON.stringify(values));
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div className="p-2">
