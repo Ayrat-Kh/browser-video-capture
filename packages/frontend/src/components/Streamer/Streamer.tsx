@@ -49,13 +49,18 @@ export const Streamer: React.FC = () => {
       makeTestApi: true,
     });
 
-    await ss.initialize({
-      async onStop() {
-        setSteamerService(null);
-      },
-    });
+    try {
+      await ss.initialize({
+        async onStop() {
+          setSteamerService(null);
+        },
+      });
 
-    await ss.start();
+      await ss.start();
+    } catch (e) {
+      console.log('Can not start stream', e);
+      return;
+    }
 
     const stream = ss.getStream();
     if (videoRef.current && stream) {
@@ -146,7 +151,7 @@ export const Streamer: React.FC = () => {
         </form>
       </Form>
       <video
-        className="border aspect-video w-100 max-w-2xl mt-2"
+        className="border aspect-video w-full max-w-2xl mt-2"
         ref={videoRef}
         width={CAMERA_RESOLUTION.width}
         height={CAMERA_RESOLUTION.height}

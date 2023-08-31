@@ -86,7 +86,7 @@ export class CameraRecorderService {
     });
 
     this.#recorder = new MediaRecorder(this.#stream, {
-      mimeType: 'video/webm;codecs="vp9"',
+      mimeType: this.getSupportedMimeType(),
     });
 
     this.#socket.connect();
@@ -150,5 +150,23 @@ export class CameraRecorderService {
     } finally {
       this.#isSending = false;
     }
+  }
+
+  private getSupportedMimeType(): string {
+    if (MediaRecorder.isTypeSupported('video/webm;codecs="vp9"')) {
+      return 'video/webm;codecs="vp9"';
+    }
+
+    if (MediaRecorder.isTypeSupported('video/webm;codecs="vp8"')) {
+      return 'video/webm;codecs="vp8"';
+    }
+
+    if (MediaRecorder.isTypeSupported('video/mp4;codecs=mp4a')) {
+      return 'video/mp4;codecs=mp4a';
+    }
+
+    console.error('Unsupported media type');
+
+    return '';
   }
 }

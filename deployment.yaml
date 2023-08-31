@@ -1,0 +1,156 @@
+# webcam backend
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-repo-wc-streamer-backend-deployment
+  namespace: webcam
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-repo-wc-streamer-backend
+  template:
+    metadata:
+      namespace: webcam
+      labels:
+        app: test-repo-wc-streamer-backend
+    spec:
+      containers:
+        - name: test-repo-wc-streamer-backend
+          image: ayratkhisamiev/test-repo-wc-streamer-backend
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-repo-wc-streamer-backend-service
+  namespace: webcam
+spec:
+  ports:
+    - port: 3001
+      protocol: TCP
+  selector:
+    app: test-repo-wc-streamer-backend
+---
+# webcam visualizer
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-repo-wc-visualizer-backend-deployment
+  namespace: webcam
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-repo-wc-visualizer-backend
+  template:
+    metadata:
+      namespace: webcam
+      labels:
+        app: test-repo-wc-visualizer-backend
+    spec:
+      containers:
+        - name: test-repo-wc-visualizer-backend
+          image: ayratkhisamiev/test-repo-wc-visualizer-backend
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3001
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-repo-wc-visualizer-backend-service
+  namespace: webcam
+spec:
+  ports:
+    - port: 3001
+      protocol: TCP
+      # targetPort: 3001 # pod port
+  selector:
+    app: test-repo-wc-visualizer-backend
+---
+# webcam frontend
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-repo-wc-frontend-deployment
+  namespace: webcam
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test-repo-wc-frontend
+  template:
+    metadata:
+      namespace: webcam
+      labels:
+        app: test-repo-wc-frontend
+    spec:
+      containers:
+        - name: test-repo-wc-frontend
+          image: ayratkhisamiev/test-repo-wc-frontend
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: test-repo-wc-frontend-service
+  namespace: webcam
+spec:
+  ports:
+    - port: 3000
+      protocol: TCP
+  selector:
+    app: test-repo-wc-frontend
+# ingress
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: webcam-ingres
+  namespace: webcam
+  annotations:
+    cert-manager.io/issuer: "red-tech-certs-cluster-issuer"
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: webcam-streamer.red-tech.cloud
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: test-repo-wc-streamer-backend-service
+                port:
+                  number: 3001
+    - host: webcam-player.red-tech.cloud
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: test-repo-wc-visualizer-backend-service
+                port:
+                  number: 3001
+    - host: webcam.red-tech.cloud
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: test-repo-wc-frontend-service
+                port:
+                  number: 3000
+  tls:
+    - secretName: red-tech.cloud
+      hosts:
+        - "webcam-streamer.red-tech.cloud"
+        - "webcam-player.red-tech.cloud"
+        - "webcam.red-tech.cloud"

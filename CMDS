@@ -28,7 +28,7 @@ docker tag webcam-streamer-backend 935995184596.dkr.ecr.us-east-1.amazonaws.com/
 docker pull 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend; docker kill webcam-visualizer-backend; docker rm webcam-visualizer-backend; docker run -d --name webcam-visualizer-backend -v /home/ubuntu/photos:/home/ubuntu/photos -p 3002:3002 935995184596.dkr.ecr.us-east-1.amazonaws.com/webcam-visualizer-backend
 
 ### docker hub
-docker build -t webcam-visualizer-backend -f ./packages/backend/apps/streamer/Dockerfile .
+docker build -t webcam-visualizer-backend -f ./packages/backend/apps/visualizer/Dockerfile .
 docker tag webcam-visualizer-backend ayratkhisamiev/test-repo-wc-visualizer-backend && docker push ayratkhisamiev/test-repo-wc-visualizer-backend
 
 ### rest
@@ -42,4 +42,8 @@ ssh -i "~/.ssh/airat-key.pem" ubuntu@ec2-18-232-80-240.compute-1.amazonaws.com
 
 # SET URL
 chrome://flags/#unsafely-treat-insecure-origin-as-secure
+
+
+
+ngrok config add-authtoken 1XAFu6YD46tzOqK9yathF9J24kC_3TTJ6Nkx6SkYsvshxujnH
 

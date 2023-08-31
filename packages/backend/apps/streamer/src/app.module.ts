@@ -12,7 +12,6 @@ import { ProvidersModule } from './providers/ProvidersModule';
     PingModule,
     VideoCaptureModule,
     ConfigurationModule,
-
     EventEmitterModule.forRoot(),
   ],
 })

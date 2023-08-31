@@ -108,11 +108,9 @@ export class VideoCaptureService {
 
     this.#upcomingLatestImages.delete(id);
 
-    if (!latestBuffer.includes('JFIF')) {
-      return;
-    }
-
-    this.logger.debug('size', latestBuffer.byteLength);
+    // if (!latestBuffer.includes('JFIF')) {
+    //   return;
+    // }
 
     this.eventEmitter.emit(
       VideoCaptureEvents.ImageCapture,
