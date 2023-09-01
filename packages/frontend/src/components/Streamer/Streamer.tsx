@@ -16,11 +16,20 @@ import {
   FormMessage,
 } from 'src/atoms/ui/form';
 import { Button } from 'src/atoms/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from 'src/atoms/ui/select';
+import { useToast } from 'src/atoms/ui/use-toast';
 
 const schema = z.object({
   sensorId: z.string().min(3, { message: 'Required' }),
   sensorName: z.string().min(3, { message: 'Required' }),
   organizationId: z.string().min(3, { message: 'Required' }),
+  cameraDeviceId: z.string().min(1, { message: 'Required' }),
 });
 
 type Schema = TypeOf<typeof schema>;
@@ -30,6 +39,11 @@ export const Streamer: React.FC = () => {
   const [steamerService, setSteamerService] =
     useState<CameraRecorderService | null>(null);
 
+  const { toast } = useToast();
+  const [cameraDevices, setCameraDevices] = useState<
+    { deviceId: string; deviceLabel: string }[]
+  >([]);
+
   const form = useForm<Schema>({
     resolver: zodResolver(schema),
   });
@@ -37,26 +51,26 @@ export const Streamer: React.FC = () => {
 
   const handleCapture = async (values: Schema) => {
     if (steamerService) {
-      await steamerService?.close();
+      await steamerService?.stop();
       setSteamerService(null);
       return;
     }
 
     localStorage.setItem('session', JSON.stringify(values));
 
-    const ss = new CameraRecorderService({
-      ...values,
-      makeTestApi: true,
-    });
+    const ss = new CameraRecorderService();
 
     try {
       await ss.initialize({
-        async onStop() {
-          setSteamerService(null);
-        },
+        ...values,
+        makeTestApi: true,
       });
 
       await ss.start();
+
+      ss.onClose = () => {
+        setSteamerService(null);
+      };
     } catch (e) {
       console.log('Can not start stream', e);
       return;
@@ -77,6 +91,19 @@ export const Streamer: React.FC = () => {
     });
   };
 
+  const handleCopyVisualizerAddress = () => {
+    const url = `${location.origin}/image/player?${new URLSearchParams(
+      form.getValues(),
+    )}`;
+    navigator.clipboard.writeText(url);
+
+    toast({
+      title: 'Copied to clipboard',
+      description: `Url: ${url}`,
+    });
+  };
+
+  // load form data from the local storage
   useEffect(() => {
     try {
       const item = localStorage.getItem('session');
@@ -91,6 +118,20 @@ export const Streamer: React.FC = () => {
     }
   }, [resetForm]);
 
+  // get all cameras
+  useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then((x) => {
+      setCameraDevices(
+        x
+          .filter((s) => s.kind === 'videoinput')
+          .map((s) => ({
+            deviceId: s.deviceId,
+            deviceLabel: s.label,
+          })),
+      );
+    });
+  }, []);
+
   return (
     <div className="p-2">
       <Form {...form}>
@@ -98,6 +139,36 @@ export const Streamer: React.FC = () => {
           onSubmit={form.handleSubmit(handleCapture)}
           className="flex flex-col space-y-2 max-w-2xl"
         >
+          <FormField
+            control={form.control}
+            name="organizationId"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Camera device</FormLabel>
+                <FormControl>
+                  <Select>
+                    <SelectTrigger>
+                      <SelectValue {...field} placeholder="Camera device" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cameraDevices.map((device) => {
+                        return (
+                          <SelectItem
+                            key={device.deviceId}
+                            value={device.deviceId}
+                          >
+                            {device.deviceLabel}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <FormField
             control={form.control}
             name="organizationId"
@@ -112,7 +183,7 @@ export const Streamer: React.FC = () => {
             )}
           />
 
-          <div className="grid grid-cols-4 items-end gap-x-2">
+          <div className="grid grid-cols-4 gap-x-2">
             <FormField
               control={form.control}
               name="sensorId"
@@ -126,9 +197,18 @@ export const Streamer: React.FC = () => {
                 </FormItem>
               )}
             />
-            <Button type="button" onClick={handleGenerateId}>
-              Generate id
-            </Button>
+            <FormItem>
+              <FormLabel>&nbsp;</FormLabel>
+              <FormControl>
+                <Button
+                  type="button"
+                  className="block"
+                  onClick={handleGenerateId}
+                >
+                  Generate id
+                </Button>
+              </FormControl>
+            </FormItem>
           </div>
 
           <FormField
@@ -145,9 +225,22 @@ export const Streamer: React.FC = () => {
             )}
           />
 
-          <Button type="submit" className="self-end">
-            {steamerService ? 'Stop' : 'Start capture'}
-          </Button>
+          <div className="flex self-end">
+            {navigator.clipboard && (
+              <Button
+                type="button"
+                variant="secondary"
+                className="mr-2"
+                onClick={handleCopyVisualizerAddress}
+              >
+                Copy visualizer address
+              </Button>
+            )}
+
+            <Button type="submit" className="self-end">
+              {steamerService ? 'Stop' : 'Start capture'}
+            </Button>
+          </div>
         </form>
       </Form>
       <video

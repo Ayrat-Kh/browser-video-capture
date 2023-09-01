@@ -12,6 +12,8 @@ export interface WebSocketConnectParams {
   sensorId: string;
   sensorName: string;
   organizationId: string;
+  width: number;
+  height: number;
 }
 
 export type ChunkIdentifier = Pick<

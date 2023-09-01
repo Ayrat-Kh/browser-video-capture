@@ -1,7 +1,8 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import { Streamer } from 'src/components/Streamer';
-import { ImagePlayer } from './components/ImagePlayer';
+import { ImagePlayer } from 'src/components/ImagePlayer';
+import { Toaster } from 'src/atoms/ui/toaster';
 
 const router = createBrowserRouter([
   {
@@ -15,7 +16,12 @@ const router = createBrowserRouter([
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <Toaster />
+    </>
+  );
 }
 
 export default App;

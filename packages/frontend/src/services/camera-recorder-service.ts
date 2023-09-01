@@ -5,80 +5,101 @@ import {
   WS_NS,
   VIDEO_WS_EVENTS,
   WebSocketConnectParams,
+  CAMERA_FRAME_RATE_MSEC,
+  CAMERA_REDUCTION_RATE,
 } from '@webcam/common';
 
 import {
   SERVER_UP_WAIT_TIME_MSEC,
   STREAMER_SOCKET_URL,
 } from 'src/constants/Config';
+
 import { streamerPing } from './api/ping-api';
+import { ChunkReducer } from './chunk-reducer';
 
 interface CameraRecorderServiceParams {
   makeTestApi?: boolean;
   sensorName: string;
   sensorId: string;
   organizationId: string;
+  cameraDeviceId: string;
 }
 
 export class CameraRecorderService {
+  public onClose:
+    | ((self: CameraRecorderService) => void | Promise<void>)
+    | null = null;
   #recorder: MediaRecorder | null = null;
   #stream: MediaStream | null = null;
-  #socket: Socket;
+  #socket: Socket | null = null;
 
   #isSending: boolean = false;
-  #makeTestApi: boolean;
-  #sensorName: string;
-  #sensorId: string;
 
-  constructor({
+  #cameraDeviceId: string | null = null;
+  #sensorName: string | null = null;
+  #sensorId: string | null = null;
+  #chunkReducer = new ChunkReducer(
+    CAMERA_FRAME_RATE_MSEC,
+    CAMERA_REDUCTION_RATE,
+  );
+
+  constructor() {
+    // just to remember class context
+    this.handleDataAvailable = this.handleDataAvailable.bind(this);
+  }
+
+  public static getCameraDevices(): Promise<
+    { deviceId: string; deviceLabel: string }[]
+  > {
+    return (
+      navigator?.mediaDevices?.enumerateDevices()?.then((devices) =>
+        devices
+          .filter((device) => device.kind === 'videoinput')
+          .map((device) => ({
+            deviceId: device.deviceId,
+            deviceLabel: device.label,
+          })),
+      ) ?? []
+    );
+  }
+
+  public async initialize({
+    cameraDeviceId,
     sensorId,
     sensorName,
-    makeTestApi,
+    makeTestApi = false,
     organizationId,
-  }: CameraRecorderServiceParams) {
-    this.#makeTestApi = makeTestApi ?? false;
-
+  }: CameraRecorderServiceParams): Promise<CameraRecorderService> {
     this.#sensorId = sensorId;
     this.#sensorName = sensorName;
+    this.#cameraDeviceId = cameraDeviceId;
+
+    await this.stop();
+
+    this.#chunkReducer.reset();
 
     this.#socket = io(`${STREAMER_SOCKET_URL}${WS_NS.VIDEO_CAPTURE}`, {
-      autoConnect: false,
+      autoConnect: true,
       transports: ['websocket'],
       query: {
         sensorId: this.#sensorId,
         sensorName: this.#sensorName,
         organizationId,
+        ...this.getScreenSize(),
       } as WebSocketConnectParams,
     });
 
-    // just to remember this context
-    this.handleDataAvailable = this.handleDataAvailable.bind(this);
-  }
-
-  public async initialize(options?: {
-    onStop?: (service: CameraRecorderService) => void | Promise<void>;
-  }): Promise<CameraRecorderService> {
-    await this.close();
-
-    while (this.#makeTestApi) {
-      const result = await streamerPing();
-
-      if (result.isSuccess) {
-        break;
-      }
-
-      console.error('Server is unavailable, please check.');
-      await new Promise((resolve) =>
-        setTimeout(resolve, SERVER_UP_WAIT_TIME_MSEC),
-      );
+    if (makeTestApi) {
+      await this.waitForServerUp();
     }
 
     this.#stream = await navigator.mediaDevices.getUserMedia({
       audio: false,
       video: {
-        ...CAMERA_RESOLUTION,
+        deviceId: this.#cameraDeviceId,
+        ...this.getScreenSize(),
         frameRate: {
-          min: 15,
+          min: 10,
           ideal: 20,
           max: 20,
         },
@@ -92,8 +113,9 @@ export class CameraRecorderService {
     this.#socket.connect();
 
     this.#socket?.on('disconnect', async () => {
-      this.close();
-      await options?.onStop?.(this);
+      this.stop();
+
+      await this.onClose?.(this);
     });
 
     this.#recorder.addEventListener('dataavailable', this.handleDataAvailable);
@@ -107,14 +129,15 @@ export class CameraRecorderService {
         resolve();
         this.#socket?.off('connect', resolveWrapper);
       };
+
       this.#socket?.on('connect', resolveWrapper);
     });
 
-    this.#recorder?.start(20);
+    this.#recorder?.start(10);
     return this;
   }
 
-  public close(): Promise<CameraRecorderService> {
+  public stop(): Promise<CameraRecorderService> {
     this.#recorder?.stream?.getTracks()?.forEach((x) => {
       x.stop();
     });
@@ -134,7 +157,7 @@ export class CameraRecorderService {
   }
 
   private async handleDataAvailable(event: BlobEvent): Promise<void> {
-    if (this.#isSending) {
+    if (!this.#socket || this.#isSending || !this.#chunkReducer.tick()) {
       return;
     }
 
@@ -144,11 +167,31 @@ export class CameraRecorderService {
       this.#socket.volatile
         .compress(true)
         .timeout(2_500)
-        .emitWithAck(VIDEO_WS_EVENTS.UPLOAD_CHUNK, event.data);
+        .emitWithAck(
+          VIDEO_WS_EVENTS.UPLOAD_CHUNK,
+          event.data,
+          this.getScreenSize(),
+        );
     } catch (e) {
       console.error('drop the frame');
     } finally {
       this.#isSending = false;
+    }
+  }
+
+  private async waitForServerUp(): Promise<void> {
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const result = await streamerPing();
+
+      if (result.isSuccess) {
+        break;
+      }
+
+      console.error('Server is unavailable, please check.');
+      await new Promise((resolve) =>
+        setTimeout(resolve, SERVER_UP_WAIT_TIME_MSEC),
+      );
     }
   }
 
@@ -165,8 +208,17 @@ export class CameraRecorderService {
       return 'video/mp4;codecs=mp4a';
     }
 
-    console.error('Unsupported media type');
+    throw new Error('Unsupported media type');
+  }
 
-    return '';
+  private getScreenSize(): { width: number; height: number } {
+    if (screen.orientation.type === 'portrait-primary') {
+      return {
+        width: CAMERA_RESOLUTION.height,
+        height: CAMERA_RESOLUTION.width,
+      };
+    }
+
+    return CAMERA_RESOLUTION;
   }
 }
