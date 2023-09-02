@@ -92,9 +92,11 @@ export const Streamer: React.FC = () => {
   };
 
   const handleCopyVisualizerAddress = () => {
-    const url = `${location.origin}/image/player?${new URLSearchParams(
-      form.getValues(),
-    )}`;
+    const { organizationId, sensorId } = form.getValues();
+    const url = `${location.origin}/image/player?${new URLSearchParams({
+      organizationId,
+      sensorId,
+    })}`;
     navigator.clipboard.writeText(url);
 
     toast({
@@ -141,14 +143,19 @@ export const Streamer: React.FC = () => {
         >
           <FormField
             control={form.control}
-            name="organizationId"
+            name="cameraDeviceId"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Camera device</FormLabel>
                 <FormControl>
-                  <Select>
+                  <Select
+                    value={field.value}
+                    onValueChange={(deviceId) =>
+                      deviceId && field.onChange(deviceId)
+                    }
+                  >
                     <SelectTrigger>
-                      <SelectValue {...field} placeholder="Camera device" />
+                      <SelectValue placeholder="Camera device" />
                     </SelectTrigger>
                     <SelectContent>
                       {cameraDevices.map((device) => {
@@ -202,7 +209,7 @@ export const Streamer: React.FC = () => {
               <FormControl>
                 <Button
                   type="button"
-                  className="block"
+                  className="block w-full"
                   onClick={handleGenerateId}
                 >
                   Generate id
