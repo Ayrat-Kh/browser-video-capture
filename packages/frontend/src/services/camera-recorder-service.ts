@@ -79,7 +79,7 @@ export class CameraRecorderService {
     this.#chunkReducer.reset();
 
     this.#socket = io(`${STREAMER_SOCKET_URL}${WS_NS.VIDEO_CAPTURE}`, {
-      autoConnect: true,
+      autoConnect: false,
       transports: ['websocket'],
       query: {
         sensorId: this.#sensorId,
@@ -110,8 +110,6 @@ export class CameraRecorderService {
       mimeType: this.getSupportedMimeType(),
     });
 
-    this.#socket.connect();
-
     this.#socket?.on('disconnect', async () => {
       this.stop();
 
@@ -124,6 +122,8 @@ export class CameraRecorderService {
   }
 
   public async start(): Promise<CameraRecorderService> {
+    this.#socket?.connect();
+
     await new Promise<void>((resolve) => {
       const resolveWrapper = () => {
         resolve();
@@ -133,7 +133,10 @@ export class CameraRecorderService {
       this.#socket?.on('connect', resolveWrapper);
     });
 
+    console.log('this.#recorder', this.#recorder);
+
     this.#recorder?.start(10);
+
     return this;
   }
 
@@ -157,7 +160,11 @@ export class CameraRecorderService {
   }
 
   private async handleDataAvailable(event: BlobEvent): Promise<void> {
-    if (!this.#socket || this.#isSending || !this.#chunkReducer.tick()) {
+    const tick = this.#chunkReducer.tick();
+
+    console.log('tick', tick);
+
+    if (!this.#socket || this.#isSending || !tick) {
       return;
     }
 
