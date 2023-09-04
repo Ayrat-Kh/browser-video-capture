@@ -10,18 +10,15 @@ import {
 import {
   CAMERA_RESOLUTION,
   CAMERA_FRAME_RATE_MSEC,
-  CAMERA_REDUCTION_RATE,
   SERVER_UP_WAIT_TIME_MSEC,
   STREAMER_SOCKET_URL,
 } from 'src/constants/Config';
 
 import { streamerPing } from './api/ping-api';
-import { ChunkReducer } from './chunk-reducer';
 
 interface CameraRecorderServiceParams {
   makeTestApi?: boolean;
   frameRate?: number;
-  frameReductionRate?: number;
 }
 
 interface CameraRecorderServiceInitParams {
@@ -39,38 +36,37 @@ export class CameraRecorderService {
   #stream: MediaStream | null = null;
   #socket: Socket | null = null;
   #makeTestApi: boolean;
-
-  #isSending: boolean = false;
+  #frameRate: number;
 
   #cameraDeviceId: string | null = null;
   #sensorName: string | null = null;
   #sensorId: string | null = null;
-  #chunkReducer;
 
   constructor({
     frameRate = CAMERA_FRAME_RATE_MSEC,
-    frameReductionRate = CAMERA_REDUCTION_RATE,
     makeTestApi = false,
   }: CameraRecorderServiceParams = {}) {
+    this.#frameRate = frameRate;
     this.#makeTestApi = makeTestApi;
-    this.#chunkReducer = new ChunkReducer(frameRate, frameReductionRate);
 
     // just to remember class context
     this.handleDataAvailable = this.handleDataAvailable.bind(this);
   }
 
-  public static getCameraDevices(): Promise<
+  public static async getCameraDevices(): Promise<
     { deviceId: string; deviceLabel: string }[]
   > {
+    await navigator.mediaDevices.getUserMedia({ audio: false, video: true });
+
     return (
-      navigator?.mediaDevices?.enumerateDevices()?.then((devices) =>
-        devices
+      navigator?.mediaDevices?.enumerateDevices()?.then((devices) => {
+        return devices
           .filter((device) => device.kind === 'videoinput')
           .map((device) => ({
             deviceId: device.deviceId,
             deviceLabel: device.label,
-          })),
-      ) ?? []
+          }));
+      }) ?? []
     );
   }
 
@@ -86,8 +82,6 @@ export class CameraRecorderService {
     this.#cameraDeviceId = cameraDeviceId;
 
     await this.stop();
-
-    this.#chunkReducer.reset();
 
     this.#socket = io(`${STREAMER_SOCKET_URL}${WS_NS.VIDEO_CAPTURE}`, {
       autoConnect: false,
@@ -144,7 +138,7 @@ export class CameraRecorderService {
       this.#socket?.on('connect', resolveWrapper);
     });
 
-    this.#recorder?.start(this.#chunkReducer.getReductionInterval());
+    this.#recorder?.start(this.#frameRate);
 
     return this;
   }
@@ -168,29 +162,14 @@ export class CameraRecorderService {
     return this.#stream;
   }
 
-  private async handleDataAvailable(event: BlobEvent): Promise<void> {
-    const tick = this.#chunkReducer.tick();
-
-    if (!this.#socket || this.#isSending || !tick) {
+  private handleDataAvailable(event: BlobEvent): void {
+    if (!this.#socket) {
       return;
     }
 
-    try {
-      this.#isSending = true;
-      this.#socket.sendBuffer = [];
-      await this.#socket.volatile
-        .compress(true)
-        .timeout(2_500)
-        .emitWithAck(
-          VIDEO_WS_EVENTS.UPLOAD_CHUNK,
-          event.data,
-          this.getScreenSize(),
-        );
-    } catch (e) {
-      console.error('drop the frame');
-    } finally {
-      this.#isSending = false;
-    }
+    this.#socket.volatile
+      .compress(true)
+      .emit(VIDEO_WS_EVENTS.UPLOAD_CHUNK, event.data, this.getScreenSize());
   }
 
   private async waitForServerUp(): Promise<void> {
@@ -226,7 +205,9 @@ export class CameraRecorderService {
   }
 
   private getScreenSize(): Size {
-    if (screen.orientation.type === 'portrait-primary') {
+    const isPortrait = window.matchMedia('(orientation: portrait)');
+
+    if (!isPortrait) {
       return {
         width: CAMERA_RESOLUTION.height,
         height: CAMERA_RESOLUTION.width,

@@ -24,6 +24,9 @@ COPY ./packages/frontend/index.html ./packages/frontend/index.html
 COPY ./packages/frontend/vite.config.ts ./packages/frontend/vite.config.ts
 COPY ./packages/frontend/postcss.config.js ./packages/frontend/postcss.config.js
 COPY ./packages/frontend/tailwind.config.js ./packages/frontend/tailwind.config.js
+COPY ./packages/frontend/components.json ./packages/frontend/components.json
+COPY ./packages/frontend/.prettierrc ./packages/frontend/.prettierrc
+COPY ./packages/frontend/.eslintrc.cjs ./packages/frontend/.eslintrc.cjs
 COPY ./packages/common/src ./packages/common/src
 
 RUN cat <<EOT >> ./packages/frontend/.env

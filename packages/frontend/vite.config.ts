@@ -14,5 +14,10 @@ export default defineConfig(({ mode }) => {
         'src/*': resolve(__dirname, './src/*'),
       },
     },
+    build: {
+      rollupOptions: {
+        external: /\.test/,
+      },
+    },
   };
 });

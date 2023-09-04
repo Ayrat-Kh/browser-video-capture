@@ -4,7 +4,6 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSearchParams } from 'react-router-dom';
 
-import { CAMERA_RESOLUTION } from '@webcam/common';
 import { CameraStreamService } from 'src/services/camera-stream-service';
 import { Button } from 'src/atoms/ui/button';
 import {
@@ -16,6 +15,7 @@ import {
   FormMessage,
 } from 'src/atoms/ui/form';
 import { Input } from 'src/atoms/ui/input';
+import { CAMERA_RESOLUTION } from 'src/constants/Config';
 
 const schema = z.object({
   sensorId: z.string().min(3, { message: 'Required' }),
@@ -58,7 +58,7 @@ export const ImagePlayer: React.FC = () => {
 
   useEffect(() => {
     try {
-      const item = localStorage.getItem('session');
+      const item = localStorage.getItem('visualizer-session');
 
       if (!item) {
         return;
@@ -82,14 +82,14 @@ export const ImagePlayer: React.FC = () => {
       } as Schema;
 
       resetForm(values);
-      localStorage.setItem('session', JSON.stringify(values));
+      localStorage.setItem('visualizer-session', JSON.stringify(values));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
     <div className="p-2">
-      <h1>Visualizer</h1>
+      <h1 className="text-3xl font-bold">Visualizer</h1>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleCapture)}

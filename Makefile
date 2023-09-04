@@ -63,3 +63,6 @@ update-streamer:
 
 update-visualizer:
 	kubectl -n webcam delete pods $(kubectl -n webcam get pods | awk '{ print $1 }' | grep visualizer-backend-deployment)
+
+make update-all: update-frontend update-streamer update-visualizer
+

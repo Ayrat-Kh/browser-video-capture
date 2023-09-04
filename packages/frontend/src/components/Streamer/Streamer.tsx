@@ -121,21 +121,14 @@ export const Streamer: React.FC = () => {
 
   // get all cameras
   useEffect(() => {
-    navigator.mediaDevices.enumerateDevices().then((x) => {
-      setCameraDevices(
-        x
-          .filter((s) => s.kind === 'videoinput')
-          .map((s) => ({
-            deviceId: s.deviceId,
-            deviceLabel: s.label,
-          })),
-      );
+    CameraRecorderService.getCameraDevices().then((x) => {
+      setCameraDevices(x);
     });
   }, []);
 
   return (
     <div className="p-2">
-      <h1>Streamer</h1>
+      <h1 className="text-3xl font-bold">Streamer</h1>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleCapture)}

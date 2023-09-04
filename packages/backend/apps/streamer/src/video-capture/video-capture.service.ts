@@ -67,6 +67,13 @@ export class VideoCaptureService {
       { stdio: ['pipe', 'pipe', null, 'pipe', 'pipe'] },
     );
 
+    ffmpegProcess.stderr.on('data', (error: Buffer) => {
+      this.logger.error(
+        `[${identifierToString(identifier)}] closed encoder:`,
+        error?.toString(),
+      );
+    });
+
     ffmpegProcess.on('close', (error: Buffer) => {
       this.logger.error(
         `[${identifierToString(identifier)}] closed encoder:`,
@@ -103,6 +110,7 @@ export class VideoCaptureService {
   async #sendImage(identifier: ChunkIdentifier, chunk: Buffer) {
     const BUFFER_SIZE = 65_536; // ffmpeg max buf size id 65_536 if we go above we should concat several sections
 
+    console.log('img');
     const id = identifierToString(identifier);
     let latestBuffer = this.#upcomingLatestImages.get(id);
     if (latestBuffer?.byteLength % BUFFER_SIZE === 0) {

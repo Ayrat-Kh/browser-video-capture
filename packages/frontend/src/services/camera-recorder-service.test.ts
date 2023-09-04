@@ -1,10 +1,13 @@
 import 'reflect-metadata';
 import { Server, createServer } from 'node:http';
-import { Server as SocketServer } from 'socket.io';
+import {
+  Server as SocketServer,
+  Socket as ServerClientSocket,
+} from 'socket.io';
 import { vi, describe, test, beforeEach, afterEach, expect } from 'vitest';
 
 import { CameraRecorderService } from './camera-recorder-service';
-import { VIDEO_WS_EVENTS, WS_NS } from '@webcam/common';
+import { Size, VIDEO_WS_EVENTS, WS_NS } from '@webcam/common';
 import { CAMERA_RESOLUTION } from 'src/constants/Config';
 
 const testMetaData = {
@@ -106,8 +109,6 @@ describe('CameraRecorderService', () => {
 
   test('should send frame with reduced rate and should always send the first chunk', async () => {
     const service = new CameraRecorderService({
-      frameRate: 60,
-      frameReductionRate: 3,
       makeTestApi: true,
     });
 
@@ -116,12 +117,17 @@ describe('CameraRecorderService', () => {
     const serverResponseCounter = vi.fn();
 
     // subscribe to all necessary server events before calling connect from frontend
-    socketServer.of(WS_NS.VIDEO_CAPTURE).on('connection', (client) => {
-      client.on(VIDEO_WS_EVENTS.UPLOAD_CHUNK, (img, size, callback) => {
-        serverResponseCounter({ img, size });
-        callback();
+    socketServer
+      .of(WS_NS.VIDEO_CAPTURE)
+      .on('connection', (client: ServerClientSocket) => {
+        client.on(
+          VIDEO_WS_EVENTS.UPLOAD_CHUNK,
+          (img: string, size: Size, callback: VoidFunction) => {
+            serverResponseCounter({ img, size });
+            callback();
+          },
+        );
       });
-    });
 
     await service.start();
 
@@ -147,12 +153,6 @@ describe('CameraRecorderService', () => {
       data: 'blob',
     });
 
-    expect(serverResponseCounter).toHaveBeenCalledOnce();
-
-    await dataHandler({
-      data: 'blob',
-    });
-
-    expect(serverResponseCounter).toHaveBeenCalledTimes(2);
+    expect(serverResponseCounter).toHaveBeenCalledTimes(3);
   });
 });
