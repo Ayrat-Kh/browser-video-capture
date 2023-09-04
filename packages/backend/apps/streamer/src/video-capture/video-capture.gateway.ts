@@ -6,6 +6,7 @@ import {
   WebSocketGateway,
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 
 import {
   type Size,
@@ -15,7 +16,6 @@ import {
   identifierToString,
 } from '@common';
 import { VideoCaptureService } from './video-capture.service';
-import { plainToClass, plainToInstance } from 'class-transformer';
 
 @WebSocketGateway({
   namespace: WS_NS.VIDEO_CAPTURE,

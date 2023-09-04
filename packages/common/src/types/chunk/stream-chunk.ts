@@ -22,10 +22,6 @@ export class WebSocketConnectParams {
 
   @CtType(() => Number)
   height: number;
-
-  constructor(partial: Partial<WebSocketConnectParams>) {
-    Object.assign(this, partial);
-  }
 }
 
 export type ChunkIdentifier = Pick<

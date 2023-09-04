@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "strictPropertyInitialization": false,
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,
@@ -11,16 +12,9 @@
     "baseUrl": "./",
     "incremental": true,
     "paths": {
-      "@common": [
-        "../common/src"
-      ],
-      "src/*": [
-        "./src/*"
-      ]
+      "@common": ["../common/src"],
+      "src/*": ["./src/*"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "dist"
-  ]
+  "exclude": ["node_modules", "dist"]
 }

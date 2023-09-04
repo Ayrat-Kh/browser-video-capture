@@ -89,6 +89,7 @@ export const ImagePlayer: React.FC = () => {
 
   return (
     <div className="p-2">
+      <h1>Visualizer</h1>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleCapture)}

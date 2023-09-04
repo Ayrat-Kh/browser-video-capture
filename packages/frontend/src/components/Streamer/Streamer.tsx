@@ -136,6 +136,7 @@ export const Streamer: React.FC = () => {
 
   return (
     <div className="p-2">
+      <h1>Streamer</h1>
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(handleCapture)}
