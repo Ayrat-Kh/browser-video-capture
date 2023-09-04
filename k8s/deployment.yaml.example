@@ -1,3 +1,4 @@
+# replace VARs in <...>
 # webcam backend
 apiVersion: apps/v1
 kind: Deployment
@@ -17,7 +18,7 @@ spec:
     spec:
       containers:
         - name: test-repo-wc-streamer-backend
-          image: ayratkhisamiev/test-repo-wc-streamer-backend
+          image: <STREAMER BACKEND>
           imagePullPolicy: Always
           ports:
             - containerPort: 3001
@@ -53,7 +54,7 @@ spec:
     spec:
       containers:
         - name: test-repo-wc-visualizer-backend
-          image: ayratkhisamiev/test-repo-wc-visualizer-backend
+          image: <VISUALIZER BACKEND>
           imagePullPolicy: Always
           ports:
             - containerPort: 3001
@@ -90,7 +91,7 @@ spec:
     spec:
       containers:
         - name: test-repo-wc-frontend
-          image: ayratkhisamiev/test-repo-wc-frontend
+          image: <FRONTEND>
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
@@ -114,11 +115,11 @@ metadata:
   name: webcam-ingres
   namespace: webcam
   annotations:
-    cert-manager.io/issuer: "red-tech-certs-cluster-issuer"
+    cert-manager.io/issuer: <CERT_ISSUER_NAME>
 spec:
   ingressClassName: nginx
   rules:
-    - host: webcam-streamer.red-tech.cloud
+    - host: <STREAMER_DOMAIN>
       http:
         paths:
           - path: /
@@ -128,7 +129,7 @@ spec:
                 name: test-repo-wc-streamer-backend-service
                 port:
                   number: 3001
-    - host: webcam-player.red-tech.cloud
+    - host: <PLAYER_DOMAIN>
       http:
         paths:
           - path: /
@@ -138,7 +139,7 @@ spec:
                 name: test-repo-wc-visualizer-backend-service
                 port:
                   number: 3001
-    - host: webcam.red-tech.cloud
+    - host: <FRONTEND_DOMAIN>
       http:
         paths:
           - path: /
@@ -149,8 +150,8 @@ spec:
                 port:
                   number: 3000
   tls:
-    - secretName: red-tech.cloud
+    - secretName: <TLS_CERT_SECRET_NAME>
       hosts:
-        - "webcam-streamer.red-tech.cloud"
-        - "webcam-player.red-tech.cloud"
-        - "webcam.red-tech.cloud"
+        - <STREAMER_DOMAIN>
+        - <PLAYER_DOMAIN>
+        - <FRONTEND_DOMAIN>
