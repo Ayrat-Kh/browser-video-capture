@@ -51,3 +51,15 @@ build-visualizer:
 
 push-visualizer:
 	docker tag ${STREAMER_DOCKER_ARTEFACT_TAG} ${VISUALIZER_DOCKER_REGISTRY} && docker push ${VISUALIZER_DOCKER_REGISTRY}
+
+deploy:
+	kubectl apply -f k8s/deployment.yaml
+
+update-frontend:
+	kubectl -n webcam delete pods $(kubectl -n webcam get pods | awk '{ print $1 }' | grep frontend-deployment)
+
+update-streamer:
+	kubectl -n webcam delete pods $(kubectl -n webcam get pods | awk '{ print $1 }' | grep streamer-backend-deployment)
+
+update-visualizer:
+	kubectl -n webcam delete pods $(kubectl -n webcam get pods | awk '{ print $1 }' | grep visualizer-backend-deployment)
