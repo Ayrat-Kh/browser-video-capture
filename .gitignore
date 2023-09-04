@@ -1,5 +1,6 @@
 node_modules/
 .env*
+# deployment.yaml
 !*.example
 **dist
 yarn-error.log
