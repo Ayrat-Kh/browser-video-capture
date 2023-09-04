@@ -1,6 +1,11 @@
 # Building layer
 FROM node:16-alpine as development
 
+ARG VITE_STREAMER_APP_URL
+ARG VITE_STREAMER_SOCKET_URL
+ARG VITE_PLAYER_APP_URL
+ARG VITE_PLAYER_SOCKET_URL
+
 WORKDIR /app
 
 # Copy configuration files
@@ -21,12 +26,15 @@ COPY ./packages/frontend/postcss.config.js ./packages/frontend/postcss.config.js
 COPY ./packages/frontend/tailwind.config.js ./packages/frontend/tailwind.config.js
 COPY ./packages/common/src ./packages/common/src
 
-ARG ENV_MODE
+RUN cat <<EOT >> ./packages/frontend/.env
+VITE_STREAMER_APP_URL=${VITE_STREAMER_APP_URL}
+VITE_STREAMER_SOCKET_URL=${VITE_STREAMER_SOCKET_URL}
+VITE_PLAYER_APP_URL=${VITE_PLAYER_APP_URL}
+VITE_PLAYER_SOCKET_URL=${VITE_PLAYER_SOCKET_URL}
+EOT
+RUN echo $(cat ./packages/frontend/.env)
 
-COPY ./packages/frontend/.env.$ENV_MODE ./packages/frontend/.env.$ENV_MODE
-RUN echo "Mode: $ENV_MODE"
-RUN yarn build:frontend --mode $ENV_MODE
-
+RUN yarn build:frontend
 # Runtime (production) layer
 FROM nginx:stable-alpine as production
 
