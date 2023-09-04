@@ -1,7 +1,13 @@
-import { VIDEO_WS_EVENTS, WS_NS, WebSocketConnectParams } from '@webcam/common';
+import { Socket, io } from 'socket.io-client';
+
+import {
+  type Size,
+  type WebSocketConnectParams,
+  VIDEO_WS_EVENTS,
+  WS_NS,
+} from '@webcam/common';
 
 import { PLAYER_SOCKET_URL } from 'src/constants/Config';
-import { Socket, io } from 'socket.io-client';
 
 interface CameraStreamServiceParams {
   organizationId: string;
@@ -55,22 +61,26 @@ export class CameraStreamService {
     return Promise.resolve(this);
   }
 
-  private async handleRequest(chunk: ArrayBuffer, callback: VoidFunction) {
+  private async handleRequest(chunk: ArrayBuffer, size: Size) {
     if (this.#isFetching) {
-      callback?.();
+      return;
+    }
+    this.#isFetching = true;
+    await this.handleRequestData(chunk, size);
+    this.#isFetching = false;
+  }
+
+  private async handleRequestData(chunk: ArrayBuffer, size: Size) {
+    if (!chunk) {
       return;
     }
 
-    this.#isFetching = true;
-    await this.handleRequestData(chunk);
-    this.#isFetching = false;
+    if (this.#canvas.width !== size.width) {
+      this.#canvas.width = size.width;
+    }
 
-    callback?.();
-  }
-
-  private async handleRequestData(chunk: ArrayBuffer) {
-    if (!chunk) {
-      return;
+    if (this.#canvas.height !== size.height) {
+      this.#canvas.height = size.height;
     }
 
     try {

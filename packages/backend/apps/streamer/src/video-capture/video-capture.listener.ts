@@ -4,7 +4,7 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { VIDEO_WS_EVENTS } from '@common';
 import {
   VideoCaptureEvents,
-  VideoCaptureImageEventData,
+  type VideoCaptureImageEventData,
 } from './video-capture.listener.events';
 import { ImageServiceSocketProvider } from '../providers/ImageServiceSocketProvider';
 
@@ -15,10 +15,14 @@ export class VideoCaptureListener {
   ) {}
 
   @OnEvent(VideoCaptureEvents.ImageCapture)
-  public async onImageReceived({ id, image }: VideoCaptureImageEventData) {
+  public async onImageReceived({
+    id,
+    image,
+    size,
+  }: VideoCaptureImageEventData) {
     this.imageServiceSocketProvider.socket.sendBuffer = [];
     this.imageServiceSocketProvider.socket.volatile
       .compress(true)
-      .emit(VIDEO_WS_EVENTS.IMAGE_PROVIDER, id, image);
+      .emit(VIDEO_WS_EVENTS.IMAGE_PROVIDER, id, image, size);
   }
 }

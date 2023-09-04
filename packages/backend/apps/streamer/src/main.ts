@@ -1,11 +1,11 @@
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions } from '@nestjs/microservices';
+import { Logger } from '@nestjs/common';
 
 import { AppModule } from './app.module';
 import { ConfigurationService } from './config/configuration.service';
 import { ImageServiceSocketProvider } from './providers/ImageServiceSocketProvider';
 import { ImageServiceSocketProviderStrategy } from './providers/ImageServiceSocketProviderStrategy';
-import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {

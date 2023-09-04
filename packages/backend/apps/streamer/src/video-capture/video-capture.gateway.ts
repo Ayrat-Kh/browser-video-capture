@@ -1,19 +1,21 @@
+import { Socket } from 'socket.io';
 import {
   OnGatewayConnection,
   OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets';
-import { Socket } from 'socket.io';
+import { Logger } from '@nestjs/common';
 
 import {
+  type Size,
   VIDEO_WS_EVENTS,
   WS_NS,
   WebSocketConnectParams,
   identifierToString,
 } from '@common';
 import { VideoCaptureService } from './video-capture.service';
-import { Logger } from '@nestjs/common';
+import { plainToClass, plainToInstance } from 'class-transformer';
 
 @WebSocketGateway({
   namespace: WS_NS.VIDEO_CAPTURE,
@@ -28,13 +30,19 @@ export class VideoCaptureGateway
   constructor(private readonly videoCaptureService: VideoCaptureService) {}
 
   public handleDisconnect(client: Socket) {
-    const query = client.handshake.query as unknown as WebSocketConnectParams;
+    const query = plainToInstance(
+      WebSocketConnectParams,
+      client.handshake.query,
+    );
 
     this.videoCaptureService.resetEncoder(query);
   }
 
   public async handleConnection(client: Socket) {
-    const query = client.handshake.query as unknown as WebSocketConnectParams;
+    const query = plainToInstance(
+      WebSocketConnectParams,
+      client.handshake.query,
+    );
 
     await this.videoCaptureService.initEncoder(query);
   }
@@ -42,9 +50,13 @@ export class VideoCaptureGateway
   @SubscribeMessage(VIDEO_WS_EVENTS.UPLOAD_CHUNK)
   public async uploadVideoChunk(
     client: Socket,
-    chunk: Buffer,
+    [chunk]: [chunk: Buffer, size: Size],
   ): Promise<boolean> {
-    const query = client.handshake.query as unknown as WebSocketConnectParams;
+    const query = plainToInstance(
+      WebSocketConnectParams,
+      client.handshake.query,
+    );
+
     try {
       await this.videoCaptureService.saveChunk({
         chunk,

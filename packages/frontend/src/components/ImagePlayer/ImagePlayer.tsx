@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { type TypeOf, z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useSearchParams } from 'react-router-dom';
 
 import { CAMERA_RESOLUTION } from '@webcam/common';
 import { CameraStreamService } from 'src/services/camera-stream-service';
@@ -15,7 +16,6 @@ import {
   FormMessage,
 } from 'src/atoms/ui/form';
 import { Input } from 'src/atoms/ui/input';
-import { useSearchParams } from 'react-router-dom';
 
 const schema = z.object({
   sensorId: z.string().min(3, { message: 'Required' }),
@@ -36,7 +36,6 @@ export const ImagePlayer: React.FC = () => {
   const { reset: resetForm } = form;
 
   const handleCapture = async (values: Schema) => {
-    console.log('click');
     if (player) {
       player?.close();
       setPlayer(null);
@@ -58,7 +57,6 @@ export const ImagePlayer: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log('click');
     try {
       const item = localStorage.getItem('session');
 
@@ -73,7 +71,6 @@ export const ImagePlayer: React.FC = () => {
   }, [resetForm]);
 
   useEffect(() => {
-    console.log('click1');
     const organizationId = searchParams.get('organizationId');
     const sensorId = searchParams.get('sensorId');
 

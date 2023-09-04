@@ -4,9 +4,10 @@ import {
   CAMERA_RESOLUTION,
   WS_NS,
   VIDEO_WS_EVENTS,
-  WebSocketConnectParams,
   CAMERA_FRAME_RATE_MSEC,
   CAMERA_REDUCTION_RATE,
+  type WebSocketConnectParams,
+  type Size,
 } from '@webcam/common';
 
 import {
@@ -133,9 +134,7 @@ export class CameraRecorderService {
       this.#socket?.on('connect', resolveWrapper);
     });
 
-    console.log('this.#recorder', this.#recorder);
-
-    this.#recorder?.start(10);
+    this.#recorder?.start(this.#chunkReducer.getReductionInterval());
 
     return this;
   }
@@ -161,8 +160,6 @@ export class CameraRecorderService {
 
   private async handleDataAvailable(event: BlobEvent): Promise<void> {
     const tick = this.#chunkReducer.tick();
-
-    console.log('tick', tick);
 
     if (!this.#socket || this.#isSending || !tick) {
       return;
@@ -218,7 +215,7 @@ export class CameraRecorderService {
     throw new Error('Unsupported media type');
   }
 
-  private getScreenSize(): { width: number; height: number } {
+  private getScreenSize(): Size {
     if (screen.orientation.type === 'portrait-primary') {
       return {
         width: CAMERA_RESOLUTION.height,

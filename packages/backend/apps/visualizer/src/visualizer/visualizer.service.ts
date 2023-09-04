@@ -4,7 +4,6 @@ import { Injectable, Logger } from '@nestjs/common';
 import { watch } from 'chokidar';
 
 import { type ChunkIdentifier, identifierToString } from '@common';
-import { ConfigurationService } from '../config/configuration.service';
 
 @Injectable()
 export class VisualizerService {
@@ -13,7 +12,7 @@ export class VisualizerService {
   #latestImageFile = new Map<string, Buffer>();
   #loaders = new Map<string, boolean>();
 
-  constructor(private readonly configurationService: ConfigurationService) {
+  constructor() {
     this.handleImageChange = this.handleImageChange.bind(this);
 
     const watcher = watch('', {

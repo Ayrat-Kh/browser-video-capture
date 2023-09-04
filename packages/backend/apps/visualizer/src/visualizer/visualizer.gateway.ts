@@ -5,7 +5,11 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 
-import { WS_NS, WebSocketConnectParams, identifierToString } from '@common';
+import {
+  type WebSocketConnectParams,
+  WS_NS,
+  identifierToString,
+} from '@common';
 
 @WebSocketGateway({
   namespace: WS_NS.STREAMER,

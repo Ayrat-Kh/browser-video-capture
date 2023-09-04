@@ -8,6 +8,9 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
-    "composite": true
+    "composite": true,
+    "moduleResolution": "NodeNext",
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false
   }
 }

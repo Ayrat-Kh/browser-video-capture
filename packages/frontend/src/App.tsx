@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
 import { Streamer } from 'src/components/Streamer';

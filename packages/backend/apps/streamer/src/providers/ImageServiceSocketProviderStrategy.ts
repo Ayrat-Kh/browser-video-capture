@@ -1,7 +1,7 @@
 import { CustomTransportStrategy, Server } from '@nestjs/microservices';
+import { Logger } from '@nestjs/common';
 
 import { ImageServiceSocketProvider } from './ImageServiceSocketProvider';
-import { Logger } from '@nestjs/common';
 
 export class ImageServiceSocketProviderStrategy
   extends Server

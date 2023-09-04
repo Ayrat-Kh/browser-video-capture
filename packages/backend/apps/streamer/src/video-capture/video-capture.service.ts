@@ -5,6 +5,7 @@ import * as ffmpegPath from 'ffmpeg-static';
 import {
   type StreamVideoChunkParams,
   type ChunkIdentifier,
+  type Size,
   identifierToString,
 } from '@common';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -13,11 +14,16 @@ import {
   VideoCaptureImageEventData,
 } from './video-capture.listener.events';
 
+interface Encoder {
+  ffmpegProc: ChildProcess;
+  size: Size;
+}
+
 @Injectable()
 export class VideoCaptureService {
   private readonly logger = new Logger(VideoCaptureService.name);
 
-  readonly #encoders = new Map<string, ChildProcess>();
+  readonly #encoders = new Map<string, Encoder>();
   readonly #upcomingLatestImages = new Map<string, Buffer>();
 
   constructor(private readonly eventEmitter: EventEmitter2) {}
@@ -31,11 +37,13 @@ export class VideoCaptureService {
     },
   ): Promise<void> {
     const encoder = this.#encoders.get(identifierToString(data));
-    encoder.stdin?.write(data.chunk);
+    encoder.ffmpegProc?.stdin?.write(data.chunk);
     return Promise.resolve();
   }
 
-  public initEncoder(identifier: ChunkIdentifier): Promise<ChildProcess> {
+  public initEncoder(
+    identifier: ChunkIdentifier & Size,
+  ): Promise<ChildProcess> {
     this.resetEncoder(identifier);
 
     this.logger.log(
@@ -70,7 +78,10 @@ export class VideoCaptureService {
       this.#sendImage(identifier, image);
     });
 
-    this.#encoders.set(identifierToString(identifier), ffmpegProcess);
+    this.#encoders.set(identifierToString(identifier), {
+      ffmpegProc: ffmpegProcess,
+      size: identifier,
+    });
 
     return Promise.resolve(ffmpegProcess);
   }
@@ -85,7 +96,7 @@ export class VideoCaptureService {
     if (this.#encoders.has(id)) {
       const ffmpegProcess = this.#encoders.get(id);
       this.#encoders.delete(id);
-      ffmpegProcess.kill();
+      ffmpegProcess?.ffmpegProc?.kill();
     }
   }
 
@@ -108,13 +119,13 @@ export class VideoCaptureService {
 
     this.#upcomingLatestImages.delete(id);
 
-    // if (!latestBuffer.includes('JFIF')) {
-    //   return;
-    // }
-
     this.eventEmitter.emit(
       VideoCaptureEvents.ImageCapture,
-      new VideoCaptureImageEventData(latestBuffer, identifier),
+      new VideoCaptureImageEventData(
+        latestBuffer,
+        identifier,
+        this.#encoders.get(id).size,
+      ),
     );
   }
 }

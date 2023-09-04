@@ -2,7 +2,8 @@ import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 
 import {
-  ChunkIdentifier,
+  type ChunkIdentifier,
+  type Size,
   VIDEO_WS_EVENTS,
   WS_NS,
   identifierToString,
@@ -20,14 +21,14 @@ export class ImageStreamerProviderGateway {
   @SubscribeMessage(VIDEO_WS_EVENTS.IMAGE_PROVIDER)
   public async subscribeLatestImage(
     _socket: Socket,
-    [id, image]: [id: ChunkIdentifier, data: Buffer],
+    [id, image, size]: [id: ChunkIdentifier, data: Buffer, size: Size],
   ): Promise<boolean> {
     const identifier = identifierToString(id);
 
     this.visualizerGateway.server
       .to(identifier)
       .volatile.compress(true)
-      .emit(VIDEO_WS_EVENTS.IMAGE, image);
+      .emit(VIDEO_WS_EVENTS.IMAGE, image, size);
 
     return true;
   }
