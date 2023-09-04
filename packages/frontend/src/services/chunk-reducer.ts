@@ -7,13 +7,14 @@ export class ChunkReducer {
   ) {}
 
   public tick(): boolean {
-    if (this.#current === this.reductionRatio) {
+    if (this.#current === this.reductionRatio - 1) {
       this.#current = 0;
+      return false;
     }
 
     const isTick = this.#current === 0;
 
-    this.#current += 0;
+    this.#current += 1;
 
     return isTick;
   }

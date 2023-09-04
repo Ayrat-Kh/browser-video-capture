@@ -4,7 +4,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z, type TypeOf } from 'zod';
 import { v4 } from 'uuid';
 
-import { CAMERA_RESOLUTION } from '@webcam/common';
 import { Input } from 'src/atoms/ui/input';
 import { CameraRecorderService } from 'src/services/camera-recorder-service';
 import {
@@ -24,6 +23,7 @@ import {
   SelectValue,
 } from 'src/atoms/ui/select';
 import { useToast } from 'src/atoms/ui/use-toast';
+import { CAMERA_RESOLUTION } from 'src/constants/Config';
 
 const schema = z.object({
   sensorId: z.string().min(3, { message: 'Required' }),
@@ -58,13 +58,12 @@ export const Streamer: React.FC = () => {
 
     localStorage.setItem('session', JSON.stringify(values));
 
-    const ss = new CameraRecorderService();
+    const ss = new CameraRecorderService({
+      makeTestApi: true,
+    });
 
     try {
-      await ss.initialize({
-        ...values,
-        makeTestApi: true,
-      });
+      await ss.initialize(values);
 
       await ss.start();
 

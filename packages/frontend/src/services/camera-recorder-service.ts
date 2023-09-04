@@ -1,16 +1,16 @@
 import { Socket, io } from 'socket.io-client';
 
 import {
-  CAMERA_RESOLUTION,
   WS_NS,
   VIDEO_WS_EVENTS,
-  CAMERA_FRAME_RATE_MSEC,
-  CAMERA_REDUCTION_RATE,
   type WebSocketConnectParams,
   type Size,
 } from '@webcam/common';
 
 import {
+  CAMERA_RESOLUTION,
+  CAMERA_FRAME_RATE_MSEC,
+  CAMERA_REDUCTION_RATE,
   SERVER_UP_WAIT_TIME_MSEC,
   STREAMER_SOCKET_URL,
 } from 'src/constants/Config';
@@ -20,6 +20,11 @@ import { ChunkReducer } from './chunk-reducer';
 
 interface CameraRecorderServiceParams {
   makeTestApi?: boolean;
+  frameRate?: number;
+  frameReductionRate?: number;
+}
+
+interface CameraRecorderServiceInitParams {
   sensorName: string;
   sensorId: string;
   organizationId: string;
@@ -33,18 +38,23 @@ export class CameraRecorderService {
   #recorder: MediaRecorder | null = null;
   #stream: MediaStream | null = null;
   #socket: Socket | null = null;
+  #makeTestApi: boolean;
 
   #isSending: boolean = false;
 
   #cameraDeviceId: string | null = null;
   #sensorName: string | null = null;
   #sensorId: string | null = null;
-  #chunkReducer = new ChunkReducer(
-    CAMERA_FRAME_RATE_MSEC,
-    CAMERA_REDUCTION_RATE,
-  );
+  #chunkReducer;
 
-  constructor() {
+  constructor({
+    frameRate = CAMERA_FRAME_RATE_MSEC,
+    frameReductionRate = CAMERA_REDUCTION_RATE,
+    makeTestApi = false,
+  }: CameraRecorderServiceParams = {}) {
+    this.#makeTestApi = makeTestApi;
+    this.#chunkReducer = new ChunkReducer(frameRate, frameReductionRate);
+
     // just to remember class context
     this.handleDataAvailable = this.handleDataAvailable.bind(this);
   }
@@ -68,9 +78,9 @@ export class CameraRecorderService {
     cameraDeviceId,
     sensorId,
     sensorName,
-    makeTestApi = false,
+
     organizationId,
-  }: CameraRecorderServiceParams): Promise<CameraRecorderService> {
+  }: CameraRecorderServiceInitParams): Promise<CameraRecorderService> {
     this.#sensorId = sensorId;
     this.#sensorName = sensorName;
     this.#cameraDeviceId = cameraDeviceId;
@@ -90,7 +100,7 @@ export class CameraRecorderService {
       } as WebSocketConnectParams,
     });
 
-    if (makeTestApi) {
+    if (this.#makeTestApi) {
       await this.waitForServerUp();
     }
 
@@ -168,7 +178,7 @@ export class CameraRecorderService {
     try {
       this.#isSending = true;
       this.#socket.sendBuffer = [];
-      this.#socket.volatile
+      await this.#socket.volatile
         .compress(true)
         .timeout(2_500)
         .emitWithAck(
