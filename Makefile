@@ -52,17 +52,32 @@ build-visualizer:
 push-visualizer:
 	docker tag ${STREAMER_DOCKER_ARTEFACT_TAG} ${VISUALIZER_DOCKER_REGISTRY} && docker push ${VISUALIZER_DOCKER_REGISTRY}
 
-deploy:
+build-push-frontend: build-frontend push-frontend
+build-push-streamer: build-streamer push-streamer
+build-push-visualizer: build-visualizer push-visualizer
+build-push-all: build-push-frontend build-push-streamer build-push-visualizer
+
+# k8s
+apply:
 	kubectl apply -f k8s/deployment.yaml
 
-update-frontend:
-	kubectl -n webcam delete pods $(kubectl -n webcam get pods | awk '{ print $1 }' | grep frontend-deployment)
+deploy-frontend:
+	kubectl -n webcam delete pods $$(kubectl -n webcam get pods | grep frontend-deployment | awk '{ print $$1 }')
 
-update-streamer:
-	kubectl -n webcam delete pods $(kubectl -n webcam get pods | awk '{ print $1 }' | grep streamer-backend-deployment)
+deploy-streamer:
+	kubectl -n webcam delete pods $$(kubectl -n webcam get pods | grep streamer-backend-deployment | awk '{ print $$1 }')
 
-update-visualizer:
-	kubectl -n webcam delete pods $(kubectl -n webcam get pods | awk '{ print $1 }' | grep visualizer-backend-deployment)
+deploy-visualizer:
+	kubectl -n webcam delete pods $$(kubectl -n webcam get pods | grep visualizer-backend-deployment | awk '{ print $$1 }')
 
-make update-all: update-frontend update-streamer update-visualizer
+deploy-all: update-frontend update-streamer update-visualizer
 
+#all
+build-push-deploy-frontend: build-push-frontend deploy-frontend
+build-push-deploy-streamer: build-push-streamer deploy-streamer
+build-push-deploy-visualizer: build-push-visualizer deploy-visualizer
+build-push-deploy-all: build-push-deploy-frontend build-push-deploy-streamer build-push-deploy-visualizer
+
+#logs
+logs-streamer:
+	kubectl -n webcam logs $$(kubectl -n webcam get pods | grep streamer-backend-deployment | awk '{ print $$1 }')

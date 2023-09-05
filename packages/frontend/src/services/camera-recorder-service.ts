@@ -36,11 +36,8 @@ export class CameraRecorderService {
   #stream: MediaStream | null = null;
   #socket: Socket | null = null;
   #makeTestApi: boolean;
+  #isSending: boolean = false;
   #frameRate: number;
-
-  #cameraDeviceId: string | null = null;
-  #sensorName: string | null = null;
-  #sensorId: string | null = null;
 
   constructor({
     frameRate = CAMERA_FRAME_RATE_MSEC,
@@ -70,39 +67,48 @@ export class CameraRecorderService {
     );
   }
 
+  public static getScreenSize(): Size {
+    const orientation = matchMedia?.('(orientation: portrait)');
+
+    if (orientation?.matches) {
+      return {
+        width: CAMERA_RESOLUTION.height,
+        height: CAMERA_RESOLUTION.width,
+      };
+    }
+
+    return CAMERA_RESOLUTION;
+  }
+
   public async initialize({
     cameraDeviceId,
     sensorId,
     sensorName,
-
     organizationId,
   }: CameraRecorderServiceInitParams): Promise<CameraRecorderService> {
-    this.#sensorId = sensorId;
-    this.#sensorName = sensorName;
-    this.#cameraDeviceId = cameraDeviceId;
-
+    this.#isSending = false;
     await this.stop();
 
     this.#socket = io(`${STREAMER_SOCKET_URL}${WS_NS.VIDEO_CAPTURE}`, {
       autoConnect: false,
       transports: ['websocket'],
       query: {
-        sensorId: this.#sensorId,
-        sensorName: this.#sensorName,
+        sensorId,
+        sensorName,
         organizationId,
-        ...this.getScreenSize(),
+        ...CameraRecorderService.getScreenSize(),
       } as WebSocketConnectParams,
     });
 
     if (this.#makeTestApi) {
-      await this.waitForServerUp();
+      await CameraRecorderService.waitForServerUp();
     }
 
     this.#stream = await navigator.mediaDevices.getUserMedia({
       audio: false,
       video: {
-        deviceId: this.#cameraDeviceId,
-        ...this.getScreenSize(),
+        deviceId: cameraDeviceId,
+        ...CameraRecorderService.getScreenSize(),
         frameRate: {
           min: 10,
           ideal: 20,
@@ -112,7 +118,7 @@ export class CameraRecorderService {
     });
 
     this.#recorder = new MediaRecorder(this.#stream, {
-      mimeType: this.getSupportedMimeType(),
+      mimeType: CameraRecorderService.getSupportedMimeType(),
     });
 
     this.#socket?.on('disconnect', async () => {
@@ -162,17 +168,7 @@ export class CameraRecorderService {
     return this.#stream;
   }
 
-  private handleDataAvailable(event: BlobEvent): void {
-    if (!this.#socket) {
-      return;
-    }
-
-    this.#socket.volatile
-      .compress(true)
-      .emit(VIDEO_WS_EVENTS.UPLOAD_CHUNK, event.data, this.getScreenSize());
-  }
-
-  private async waitForServerUp(): Promise<void> {
+  private static async waitForServerUp(): Promise<void> {
     // eslint-disable-next-line no-constant-condition
     while (true) {
       const result = await streamerPing();
@@ -188,7 +184,7 @@ export class CameraRecorderService {
     }
   }
 
-  private getSupportedMimeType(): string {
+  private static getSupportedMimeType(): string {
     if (MediaRecorder.isTypeSupported('video/webm;codecs="vp9"')) {
       return 'video/webm;codecs="vp9"';
     }
@@ -204,16 +200,18 @@ export class CameraRecorderService {
     throw new Error('Unsupported media type');
   }
 
-  private getScreenSize(): Size {
-    const isPortrait = window.matchMedia('(orientation: portrait)');
-
-    if (!isPortrait) {
-      return {
-        width: CAMERA_RESOLUTION.height,
-        height: CAMERA_RESOLUTION.width,
-      };
+  private async handleDataAvailable(event: BlobEvent): Promise<void> {
+    if (!this.#socket || this.#isSending) {
+      return;
     }
 
-    return CAMERA_RESOLUTION;
+    this.#isSending = true;
+
+    const data = await event.data.arrayBuffer();
+
+    this.#socket.sendBuffer = [];
+    this.#socket?.volatile.emit(VIDEO_WS_EVENTS.UPLOAD_CHUNK, data);
+
+    this.#isSending = false;
   }
 }

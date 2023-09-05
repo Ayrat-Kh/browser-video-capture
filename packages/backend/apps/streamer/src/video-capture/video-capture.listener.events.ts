@@ -11,3 +11,10 @@ export class VideoCaptureImageEventData {
     public readonly size: Size,
   ) {}
 }
+
+export class VideoCaptureImageMetaEventData {
+  constructor(
+    public readonly image: Buffer,
+    public readonly id: ChunkIdentifier,
+  ) {}
+}

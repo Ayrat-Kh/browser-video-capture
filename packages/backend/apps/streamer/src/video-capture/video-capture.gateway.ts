@@ -9,7 +9,6 @@ import { Logger } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 
 import {
-  type Size,
   VIDEO_WS_EVENTS,
   WS_NS,
   WebSocketConnectParams,
@@ -44,13 +43,15 @@ export class VideoCaptureGateway
       client.handshake.query,
     );
 
+    client.join(identifierToString(query));
+
     await this.videoCaptureService.initEncoder(query);
   }
 
   @SubscribeMessage(VIDEO_WS_EVENTS.UPLOAD_CHUNK)
   public async uploadVideoChunk(
     client: Socket,
-    [chunk]: [chunk: Buffer, size: Size],
+    chunk: Buffer,
   ): Promise<boolean> {
     const query = plainToInstance(
       WebSocketConnectParams,

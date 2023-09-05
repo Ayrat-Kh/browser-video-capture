@@ -1,5 +1,6 @@
 import { spawn, type ChildProcess } from 'node:child_process';
 import { Injectable, Logger } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 import * as ffmpegPath from 'ffmpeg-static';
 
 import {
@@ -8,7 +9,6 @@ import {
   type Size,
   identifierToString,
 } from '@common';
-import { EventEmitter2 } from '@nestjs/event-emitter';
 import {
   VideoCaptureEvents,
   VideoCaptureImageEventData,
@@ -53,14 +53,18 @@ export class VideoCaptureService {
     const ffmpegProcess = spawn(
       ffmpegPath as unknown as string,
       [
+        ...['-probesize', '8M'],
         ...['-i', '-'],
+        ...['-framerate', '20'],
         '-an',
+        ...['-b:v', '8M'],
+        ...['-maxrate', '8M'],
+        ...['-bufsize', '4M'],
 
         // image
-        ...['-c:v', 'mjpeg'],
-        ...['-qscale:v', '8'],
         ...['-vf', 'fps=20'],
-        ...['-preset', 'ultrafast'],
+        ...['-preset', 'veryfast'],
+        ...['-tune', 'zerolatency'],
         ...['-f', 'image2pipe'],
         'pipe:3',
       ],
@@ -68,7 +72,7 @@ export class VideoCaptureService {
     );
 
     ffmpegProcess.stderr.on('data', (error: Buffer) => {
-      this.logger.error(
+      this.logger.debug(
         `[${identifierToString(identifier)}] closed encoder:`,
         error?.toString(),
       );
@@ -110,7 +114,6 @@ export class VideoCaptureService {
   async #sendImage(identifier: ChunkIdentifier, chunk: Buffer) {
     const BUFFER_SIZE = 65_536; // ffmpeg max buf size id 65_536 if we go above we should concat several sections
 
-    console.log('img');
     const id = identifierToString(identifier);
     let latestBuffer = this.#upcomingLatestImages.get(id);
     if (latestBuffer?.byteLength % BUFFER_SIZE === 0) {

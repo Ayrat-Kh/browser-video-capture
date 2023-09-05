@@ -50,6 +50,16 @@ export const Streamer: React.FC = () => {
   const { reset: resetForm } = form;
 
   const handleCapture = async (values: Schema) => {
+    const size = CameraRecorderService.getScreenSize();
+
+    if (videoRef.current && videoRef.current?.width !== size.width) {
+      videoRef.current.width = size.width;
+    }
+
+    if (videoRef.current && videoRef.current?.height !== size.height) {
+      videoRef.current.height = size.height;
+    }
+
     if (steamerService) {
       await steamerService?.stop();
       setSteamerService(null);

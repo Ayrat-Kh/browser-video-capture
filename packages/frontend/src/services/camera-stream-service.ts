@@ -21,7 +21,6 @@ export class CameraStreamService {
 
   #canvas: HTMLCanvasElement;
   #socket: Socket;
-  #timer: NodeJS.Timeout | undefined;
   #isFetching = false;
 
   constructor({ canvas, sensorId, organizationId }: CameraStreamServiceParams) {
@@ -47,7 +46,6 @@ export class CameraStreamService {
     await this.close();
 
     this.#socket.connect();
-
     this.#socket.on(VIDEO_WS_EVENTS.IMAGE, this.handleRequest);
 
     return this;
@@ -56,7 +54,6 @@ export class CameraStreamService {
   public close(): Promise<CameraStreamService> {
     this.#socket?.off(VIDEO_WS_EVENTS.IMAGE, this.handleRequest);
     this.#socket?.close();
-    clearInterval(this.#timer);
 
     return Promise.resolve(this);
   }

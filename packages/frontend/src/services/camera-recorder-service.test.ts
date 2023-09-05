@@ -7,8 +7,7 @@ import {
 import { vi, describe, test, beforeEach, afterEach, expect } from 'vitest';
 
 import { CameraRecorderService } from './camera-recorder-service';
-import { Size, VIDEO_WS_EVENTS, WS_NS } from '@webcam/common';
-import { CAMERA_RESOLUTION } from 'src/constants/Config';
+import { VIDEO_WS_EVENTS, WS_NS } from '@webcam/common';
 
 const testMetaData = {
   cameraDeviceId: 'cameraDeviceId',
@@ -52,6 +51,8 @@ vi.stubGlobal(
     }
   },
 );
+
+vi.stubGlobal('matchMedia', vi.fn());
 
 // mock ping request
 const fetchFn = vi.fn(() => ({
@@ -117,41 +118,50 @@ describe('CameraRecorderService', () => {
     const serverResponseCounter = vi.fn();
 
     // subscribe to all necessary server events before calling connect from frontend
+    let serverClientSocket: ServerClientSocket | undefined;
     socketServer
       .of(WS_NS.VIDEO_CAPTURE)
-      .on('connection', (client: ServerClientSocket) => {
-        client.on(
-          VIDEO_WS_EVENTS.UPLOAD_CHUNK,
-          (img: string, size: Size, callback: VoidFunction) => {
-            serverResponseCounter({ img, size });
-            callback();
-          },
-        );
+      .on('connection', (_client: ServerClientSocket) => {
+        serverClientSocket = _client;
       });
 
     await service.start();
 
     // get MediaRecorder available data mock
     const dataHandler = addDataAvailableEvent.mock.lastCall[1] as (data: {
-      data: string;
+      data: Blob;
     }) => void;
 
-    await dataHandler({
-      data: 'blob',
+    const blob = new Blob(['blob']);
+
+    const createMessageAwaiter = () =>
+      new Promise<void>((resolve) => {
+        const sub = (img: Buffer) => {
+          serverResponseCounter({ img });
+          serverClientSocket?.off(VIDEO_WS_EVENTS.UPLOAD_CHUNK, sub);
+          resolve();
+        };
+        serverClientSocket?.on(VIDEO_WS_EVENTS.UPLOAD_CHUNK, sub);
+      });
+
+    dataHandler({
+      data: blob,
     });
+    await createMessageAwaiter();
 
     expect(serverResponseCounter).toHaveBeenCalledOnce();
     expect(serverResponseCounter).toHaveBeenCalledWith({
-      img: 'blob',
-      size: CAMERA_RESOLUTION,
+      img: expect.objectContaining({}),
     });
 
-    await dataHandler({
-      data: 'blob',
+    dataHandler({
+      data: blob,
     });
-    await dataHandler({
-      data: 'blob',
+    await createMessageAwaiter();
+    dataHandler({
+      data: blob,
     });
+    await createMessageAwaiter();
 
     expect(serverResponseCounter).toHaveBeenCalledTimes(3);
   });

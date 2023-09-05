@@ -1,12 +1,12 @@
-import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
+import { SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 
 import {
   type ChunkIdentifier,
-  type Size,
   VIDEO_WS_EVENTS,
   WS_NS,
   identifierToString,
+  Size,
 } from '@common';
 import { VisualizerGateway } from '../visualizer/visualizer.gateway';
 
@@ -27,7 +27,7 @@ export class ImageStreamerProviderGateway {
 
     this.visualizerGateway.server
       .to(identifier)
-      .volatile.compress(true)
+      .compress(true)
       .emit(VIDEO_WS_EVENTS.IMAGE, image, size);
 
     return true;
