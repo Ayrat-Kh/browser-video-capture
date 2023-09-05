@@ -54,16 +54,16 @@ export class VideoCaptureService {
       ffmpegPath as unknown as string,
       [
         ...['-seek_timestamp', '1'],
-        ...['-probesize', '8M'],
+        ...['-ignore_unknown'],
+        ...['-probesize', '1M'],
         ...['-i', '-'],
         ...['-framerate', '20'],
         '-an',
-        ...['-b:v', '8M'],
-        ...['-maxrate', '8M'],
-        ...['-bufsize', '4M'],
+        ...['-b:v', '10M'],
+        ...['-maxrate', '10M'],
+        ...['-bufsize', '20M'],
 
         // image
-        ...['-vf', 'fps=20'],
         ...['-preset', 'veryfast'],
         ...['-tune', 'zerolatency'],
         ...['-f', 'image2pipe'],

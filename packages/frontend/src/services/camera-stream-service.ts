@@ -16,37 +16,33 @@ interface CameraStreamServiceParams {
 }
 
 export class CameraStreamService {
-  #sensorId: string;
-  #organizationId: string;
-
   #canvas: HTMLCanvasElement;
   #socket: Socket;
-  #isFetching = false;
 
-  constructor({ canvas, sensorId, organizationId }: CameraStreamServiceParams) {
-    this.#organizationId = organizationId;
-    this.#sensorId = sensorId;
+  constructor() {
+    this.handleRequest = this.handleRequest.bind(this);
+    this.handleRequestData = this.handleRequestData.bind(this);
+  }
+
+  public async initialize({
+    canvas,
+    sensorId,
+    organizationId,
+  }: CameraStreamServiceParams): Promise<CameraStreamService> {
+    await this.close();
 
     this.#socket = io(`${PLAYER_SOCKET_URL}${WS_NS.STREAMER}`, {
       autoConnect: false,
       transports: ['websocket'],
       query: {
-        sensorName: '',
-        sensorId: this.#sensorId,
-        organizationId: this.#organizationId,
-      } as WebSocketConnectParams,
+        sensorId,
+        organizationId,
+      } as Pick<WebSocketConnectParams, 'organizationId' | 'sensorId'>,
     });
 
-    this.#canvas = canvas;
-    this.handleRequest = this.handleRequest.bind(this);
-    this.handleRequestData = this.handleRequestData.bind(this);
-  }
-
-  public async initialize(): Promise<CameraStreamService> {
-    await this.close();
-
-    this.#socket.connect();
     this.#socket.on(VIDEO_WS_EVENTS.IMAGE, this.handleRequest);
+    this.#socket.connect();
+    this.#canvas = canvas;
 
     return this;
   }
@@ -59,12 +55,8 @@ export class CameraStreamService {
   }
 
   private async handleRequest(chunk: ArrayBuffer, size: Size) {
-    if (this.#isFetching) {
-      return;
-    }
-    this.#isFetching = true;
+    console.log('hr');
     await this.handleRequestData(chunk, size);
-    this.#isFetching = false;
   }
 
   private async handleRequestData(chunk: ArrayBuffer, size: Size) {
@@ -90,8 +82,6 @@ export class CameraStreamService {
         ?.drawImage(bitmap, 0, 0, this.#canvas.width, this.#canvas.height);
     } catch (e) {
       console.error(e);
-    } finally {
-      this.#isFetching = false;
     }
   }
 }

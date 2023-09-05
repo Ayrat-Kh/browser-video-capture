@@ -6,8 +6,8 @@ import {
 } from 'socket.io';
 import { vi, describe, test, beforeEach, afterEach, expect } from 'vitest';
 
-import { CameraRecorderService } from './camera-recorder-service';
 import { VIDEO_WS_EVENTS, WS_NS } from '@webcam/common';
+import { CameraRecorderService } from './camera-recorder-service';
 
 const testMetaData = {
   cameraDeviceId: 'cameraDeviceId',
