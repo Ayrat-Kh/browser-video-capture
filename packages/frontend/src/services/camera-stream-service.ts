@@ -55,7 +55,6 @@ export class CameraStreamService {
   }
 
   private async handleRequest(chunk: ArrayBuffer, size: Size) {
-    console.log('hr');
     await this.handleRequestData(chunk, size);
   }
 

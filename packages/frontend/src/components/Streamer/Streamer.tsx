@@ -81,7 +81,7 @@ export const Streamer: React.FC = () => {
         setSteamerService(null);
       };
     } catch (e) {
-      console.log('Can not start stream', e);
+      console.error('Can not start stream', e);
       return;
     }
 
