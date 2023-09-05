@@ -59,11 +59,13 @@ export class VideoCaptureService {
         ...['-i', '-'],
         ...['-framerate', '20'],
         '-an',
-        ...['-b:v', '10M'],
-        ...['-maxrate', '10M'],
-        ...['-bufsize', '20M'],
+        ...['-b:v', '14M'],
+        ...['-maxrate', '14M'],
+        ...['-bufsize', '7M'],
 
         // image
+        ...['-vf', 'fps=20'],
+        ...['-c:v', 'mjpeg'],
         ...['-preset', 'veryfast'],
         ...['-tune', 'zerolatency'],
         ...['-f', 'image2pipe'],
@@ -74,7 +76,7 @@ export class VideoCaptureService {
 
     ffmpegProcess.stderr.on('data', (error: Buffer) => {
       this.logger.debug(
-        `[${identifierToString(identifier)}] closed encoder:`,
+        `[${identifierToString(identifier)}] [stderr-info]:`,
         error?.toString(),
       );
     });
