@@ -46,12 +46,12 @@ export const ImagePlayer: React.FC = () => {
       return;
     }
 
-    const streamer = new CameraStreamService({
+    const streamer = new CameraStreamService();
+
+    streamer.initialize({
       ...values,
       canvas: canvasRef.current,
     });
-
-    streamer.initialize();
 
     setPlayer(streamer);
   };

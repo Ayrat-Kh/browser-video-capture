@@ -8,12 +8,10 @@
     "format": "prettier --write \"apps/**/*.ts\"",
     "---- streamer ----": "",
     "start:streamer:dev": "IMAGE_SOCKET_SERVER_URL='ws://localhost:3002' APP_PORT=3001 nest start streamer --watch",
-    "start:streamer:debug": "IMAGE_SOCKET_SERVER_URL='ws://localhost:3002' APP_PORT=3001 nest start streamer --debug --watch",
-    "test:streamer": "jest",
-    "test:e2e:streamer": "jest --config ./apps/streamer/test/jest-e2e.json",
+    "test:streamer": "jest --config ./streamer.jest.config.ts",
     "---- player ----": "",
     "start:visualizer:dev": "APP_PORT=3002 nest start visualizer --watch",
-    "start:visualizer:debug": "APP_PORT=3002 nest start visualizer --debug --watch"
+    "test:visualizer": "jest --config ./visualizer.jest.config.ts"
   },
   "dependencies": {
     "@nestjs/common": "^10.0.0",
@@ -56,25 +54,5 @@
     "ts-node": "^10.9.1",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.1.6"
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json",
-      "ts"
-    ],
-    "rootDir": ".",
-    "testRegex": ".*\\.spec\\.ts$",
-    "transform": {
-      "^.+\\.(t|j)s$": "ts-jest"
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "./coverage",
-    "testEnvironment": "node",
-    "roots": [
-      "<rootDir>/apps/"
-    ]
   }
 }
