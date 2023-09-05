@@ -53,6 +53,7 @@ export class VideoCaptureService {
     const ffmpegProcess = spawn(
       ffmpegPath as unknown as string,
       [
+        ...['-seek_timestamp', '1'],
         ...['-probesize', '8M'],
         ...['-i', '-'],
         ...['-framerate', '20'],
