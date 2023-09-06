@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 
-import { VIDEO_WS_EVENTS } from '@common';
+import { VIDEO_WS_EVENTS } from '@webcam/common';
 import {
   VideoCaptureEvents,
   type VideoCaptureImageEventData,

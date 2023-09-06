@@ -8,7 +8,7 @@ import {
   type ChunkIdentifier,
   type Size,
   identifierToString,
-} from '@common';
+} from '@webcam/common';
 import {
   VideoCaptureEvents,
   VideoCaptureImageEventData,

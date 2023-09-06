@@ -9,7 +9,7 @@ import {
   type WebSocketConnectParams,
   WS_NS,
   identifierToString,
-} from '@common';
+} from '@webcam/common';
 
 @WebSocketGateway({
   namespace: WS_NS.STREAMER,

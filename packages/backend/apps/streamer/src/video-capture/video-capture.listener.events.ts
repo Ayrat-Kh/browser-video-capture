@@ -1,4 +1,4 @@
-import { type ChunkIdentifier, type Size } from '@common';
+import { type ChunkIdentifier, type Size } from '@webcam/common';
 
 export const VideoCaptureEvents = {
   ImageCapture: 'video-capture.image',

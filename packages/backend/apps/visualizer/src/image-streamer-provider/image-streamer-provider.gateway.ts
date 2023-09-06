@@ -7,7 +7,7 @@ import {
   WS_NS,
   identifierToString,
   Size,
-} from '@common';
+} from '@webcam/common';
 import { VisualizerGateway } from '../visualizer/visualizer.gateway';
 
 @WebSocketGateway({

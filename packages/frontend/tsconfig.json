@@ -22,7 +22,8 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "src/*": ["src/*"]
+      "src/*": ["src/*"],
+      "@webcam/common": ["../common/src"]
     },
     "baseUrl": "./"
   },

@@ -1,7 +1,7 @@
 import { Socket, io } from 'socket.io-client';
 import { Inject, Injectable } from '@nestjs/common';
 
-import { WS_NS } from '@common';
+import { WS_NS } from '@webcam/common';
 import { ConfigurationService } from '../config/configuration.service';
 
 @Injectable()

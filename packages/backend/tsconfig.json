@@ -12,7 +12,7 @@
     "incremental": true,
     "baseUrl": "./",
     "paths": {
-      "@common": ["../common/src"],
+      "@webcam/common": ["../common/src"],
       "src/*": ["./src/*"]
     }
   },

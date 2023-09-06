@@ -15,7 +15,7 @@ import {
   WS_NS,
   WebSocketConnectParams,
   identifierToString,
-} from '@common';
+} from '@webcam/common';
 import { VideoCaptureService } from './video-capture.service';
 
 @WebSocketGateway({
