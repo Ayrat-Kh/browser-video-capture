@@ -118,10 +118,10 @@ getUserMedia -> MediaREcorder (video stream) -> video-stream (output)
 \ /
 ```
 
-streamer (backend)
+streamer (backend) - for more info please check [here](./packages/backend/Readme.md)
 
 ```
-video-stream (input) -> ffmpeg -> image (output)
+video-stream (input) -> ffmpeg -> image (output),
 ```
 
 ```
