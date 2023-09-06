@@ -147,3 +147,7 @@ visualizer (frontend)
 ```
 image (input) -> draw in canvas
 ```
+
+## Streamer and visualizer info
+
+See readme [here](./packages/frontend-api/Readme.md)

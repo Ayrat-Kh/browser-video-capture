@@ -11,7 +11,7 @@
     "dev:frontend-api": "yarn workspace @webcam/frontend-api dev",
     "build:frontend-api": "yarn workspace @webcam/frontend-api build",
     "--- streamer-frontend ---": "",
-    "dev:frontend": "yarn workspace @webcam/frontend dev",
+    "dev:frontend": "yarn build:frontend-api && yarn workspace @webcam/frontend dev",
     "build:frontend": "yarn build:frontend-api && yarn workspace @webcam/frontend build",
     "---- streamer-backend ----": "",
     "dev:streamer": "yarn workspace @webcam/backend start:streamer:dev",

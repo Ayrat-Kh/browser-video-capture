@@ -35,7 +35,7 @@ export const ImagePlayer: React.FC = () => {
   });
   const { reset: resetForm } = form;
 
-  const handleCapture = async (values: Schema) => {
+  const handlePlay = async (values: Schema) => {
     if (player) {
       player?.close();
       setPlayer(null);
@@ -94,7 +94,7 @@ export const ImagePlayer: React.FC = () => {
       <h1 className="text-3xl font-bold">Visualizer</h1>
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit(handleCapture)}
+          onSubmit={form.handleSubmit(handlePlay)}
           className="flex flex-col space-y-2 max-w-2xl"
         >
           <FormField
