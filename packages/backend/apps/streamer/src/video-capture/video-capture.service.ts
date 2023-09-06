@@ -46,25 +46,25 @@ export class VideoCaptureService {
       `Org id: ${identifier.organizationId} SensorId: ${identifier.sensorId}: init encoder`,
     );
 
+    const SIZE = 8;
+
     const ffmpegProcess = spawn(
       ffmpegPath as unknown as string,
       [
-        ...['-seek_timestamp', '1'],
         ...['-ignore_unknown'],
-        ...['-probesize', '1M'],
-        ...['-i', '-'],
-        ...['-framerate', '20'],
+        ...['-probesize', '5M'],
         '-an',
-        ...['-b:v', '14M'],
-        ...['-maxrate', '14M'],
-        ...['-bufsize', '7M'],
-
+        ...['-i', '-'],
         // image
-        ...['-vf', 'fps=20'],
-        ...['-c:v', 'mjpeg'],
-        ...['-preset', 'veryfast'],
         ...['-tune', 'zerolatency'],
+
+        ...['-r', '20'],
         ...['-f', 'image2pipe'],
+        ...['-c:v', 'mjpeg'],
+        ...['-b:v', `${SIZE}M`],
+        ...['-maxrate', `${SIZE}M`],
+        ...['-bufsize', `${2 * SIZE}M`],
+
         'pipe:3',
       ],
       { stdio: ['pipe', 'pipe', null, 'pipe', 'pipe'] },
@@ -124,9 +124,11 @@ export class VideoCaptureService {
 
     this.#upcomingLatestImages.set(id, latestBuffer);
 
-    if (imageChunk.byteLength === BUFFER_SIZE || !this.#encoders.get(id)) {
+    if (imageChunk.byteLength === BUFFER_SIZE) {
       return;
     }
+
+    console.log('imageChunk', latestBuffer.byteLength);
 
     this.#upcomingLatestImages.delete(id);
 
