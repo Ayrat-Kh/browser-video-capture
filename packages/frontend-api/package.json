@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "dev": "tsc --watch",
     "build": "tsc",
-    "test": "vitest run"
+    "test": "vitest run --config ./vitest.config.ts"
   },
+  "module": "lib/frontend-api/src/index.js",
+  "main": "lib/frontend-api/src/index.js",
   "dependencies": {
     "class-transformer": "^0.5.1",
     "reflect-metadata": "^0.1.13",

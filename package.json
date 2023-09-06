@@ -7,13 +7,17 @@
     "packages/frontend-api"
   ],
   "scripts": {
+    "--- streamer-api ---": "",
+    "dev:frontend-api": "yarn workspace @webcam/frontend-api dev",
+    "build:frontend-api": "yarn workspace @webcam/frontend-api build",
+    "--- streamer-frontend ---": "",
     "dev:frontend": "yarn workspace @webcam/frontend dev",
-    "build:frontend": "yarn workspace @webcam/frontend build",
+    "build:frontend": "yarn build:frontend-api && yarn workspace @webcam/frontend build",
     "---- streamer-backend ----": "",
     "dev:streamer": "yarn workspace @webcam/backend start:streamer:dev",
     "build:backend": "yarn workspace @webcam/backend build",
     "---- streamer-player ----": "",
     "dev:visualizer": "yarn workspace @webcam/backend start:visualizer:dev",
-    "test": "yarn workspace @webcam/backend test:streamer && yarn workspace @webcam/backend test:visualizer && yarn workspace @webcam/frontend test"
+    "test": "yarn workspace @webcam/backend test:streamer && yarn workspace @webcam/backend test:visualizer && yarn workspace @webcam/frontend-api test"
   }
 }

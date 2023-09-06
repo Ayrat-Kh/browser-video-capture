@@ -12,7 +12,7 @@ const config: Config = {
   testEnvironment: 'node',
   roots: ['<rootDir>/apps/visualizer'],
   moduleNameMapper: {
-    '^@common$': '<rootDir>/../common/src',
+    '^@webcam/common$': '<rootDir>/../common/src',
   },
 };
 

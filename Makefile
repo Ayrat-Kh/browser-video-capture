@@ -4,7 +4,6 @@ include .env
 # Envs from .env for frontend:
 # 	- FRONTEND_STREAMER_APP_URL
 # 	- FRONTEND_STREAMER_SOCKET_URL
-# 	- FRONTEND_PLAYER_APP_URL
 # 	- FRONTEND_PLAYER_SOCKET_URL
 #   - FRONTEND_DOCKER_REGISTRY
 export FRONTEND_DOCKER_ARTEFACT_TAG=webcam-frontend
@@ -15,7 +14,6 @@ build-frontend:
 		-f ./packages/frontend/Dockerfile \
 		--build-arg VITE_STREAMER_APP_URL=${FRONTEND_STREAMER_APP_URL} \
 		--build-arg VITE_STREAMER_SOCKET_URL=${FRONTEND_STREAMER_SOCKET_URL} \
-		--build-arg VITE_PLAYER_APP_URL=${FRONTEND_PLAYER_APP_URL} \
 		--build-arg VITE_PLAYER_SOCKET_URL=${FRONTEND_PLAYER_SOCKET_URL} \
 		.
 

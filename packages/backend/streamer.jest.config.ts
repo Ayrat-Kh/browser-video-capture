@@ -12,7 +12,7 @@ const config: Config = {
   testEnvironment: 'node',
   roots: ['<rootDir>/apps/streamer'],
   moduleNameMapper: {
-    '^@common$': '<rootDir>/../common/src',
+    '^@webcam/common$': '<rootDir>/../common/src',
   },
 };
 

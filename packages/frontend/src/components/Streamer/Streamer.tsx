@@ -5,7 +5,7 @@ import { z, type TypeOf } from 'zod';
 import { v4 } from 'uuid';
 
 import { Input } from 'src/atoms/ui/input';
-import { CameraRecorderService } from 'src/services/camera-recorder-service';
+import { CameraRecorderService, CAMERA_RESOLUTION } from '@webcam/frontend-api';
 import {
   Form,
   FormControl,
@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from 'src/atoms/ui/select';
 import { useToast } from 'src/atoms/ui/use-toast';
-import { CAMERA_RESOLUTION } from 'src/constants/Config';
+import { STREAMER_APP_URL, STREAMER_SOCKET_URL } from 'src/constants';
 
 const schema = z.object({
   sensorId: z.string().min(3, { message: 'Required' }),
@@ -69,6 +69,8 @@ export const Streamer: React.FC = () => {
     localStorage.setItem('session', JSON.stringify(values));
 
     const ss = new CameraRecorderService({
+      socketAppUrl: STREAMER_SOCKET_URL,
+      appUrl: STREAMER_APP_URL,
       makeTestApi: true,
     });
 

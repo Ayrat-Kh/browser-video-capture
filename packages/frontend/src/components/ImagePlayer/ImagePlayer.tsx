@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useSearchParams } from 'react-router-dom';
 
-import { CameraStreamService } from 'src/services/camera-stream-service';
+import { CameraStreamService, CAMERA_RESOLUTION } from '@webcam/frontend-api';
 import { Button } from 'src/atoms/ui/button';
 import {
   Form,
@@ -15,7 +15,7 @@ import {
   FormMessage,
 } from 'src/atoms/ui/form';
 import { Input } from 'src/atoms/ui/input';
-import { CAMERA_RESOLUTION } from 'src/constants/Config';
+import { PLAYER_SOCKET_URL } from 'src/constants';
 
 const schema = z.object({
   sensorId: z.string().min(3, { message: 'Required' }),
@@ -46,7 +46,9 @@ export const ImagePlayer: React.FC = () => {
       return;
     }
 
-    const streamer = new CameraStreamService();
+    const streamer = new CameraStreamService({
+      socketAppUrl: PLAYER_SOCKET_URL,
+    });
 
     streamer.initialize({
       ...values,

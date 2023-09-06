@@ -11,7 +11,7 @@ import {
   CAMERA_RESOLUTION,
   CAMERA_FRAME_RATE_MSEC,
   SERVER_UP_WAIT_TIME_MSEC,
-} from 'src/constants/Config';
+} from './constants';
 
 import { streamerPing } from './api/ping-api';
 
