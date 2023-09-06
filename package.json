@@ -3,7 +3,8 @@
   "private": true,
   "workspaces": [
     "packages/backend",
-    "packages/frontend"
+    "packages/frontend",
+    "packages/frontend-api"
   ],
   "scripts": {
     "dev:frontend": "yarn workspace @webcam/frontend dev",

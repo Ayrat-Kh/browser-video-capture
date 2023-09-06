@@ -8,16 +8,23 @@ import {
 } from '@webcam/common';
 
 interface CameraStreamServiceParams {
+  socketAppUrl: string;
+}
+
+interface CameraStreamServiceInitParams {
   organizationId: string;
   sensorId: string;
   canvas: HTMLCanvasElement;
 }
 
 export class CameraStreamService {
+  #socketAppUrl: string;
   #canvas: HTMLCanvasElement;
   #socket: Socket;
 
-  constructor() {
+  constructor({ socketAppUrl }: CameraStreamServiceParams) {
+    this.#socketAppUrl = socketAppUrl;
+
     this.handleRequest = this.handleRequest.bind(this);
     this.handleRequestData = this.handleRequestData.bind(this);
   }
@@ -26,10 +33,10 @@ export class CameraStreamService {
     canvas,
     sensorId,
     organizationId,
-  }: CameraStreamServiceParams): Promise<CameraStreamService> {
+  }: CameraStreamServiceInitParams): Promise<CameraStreamService> {
     await this.close();
 
-    this.#socket = io(`${PLAYER_SOCKET_URL}${WS_NS.STREAMER}`, {
+    this.#socket = io(`${this.#socketAppUrl}${WS_NS.STREAMER}`, {
       autoConnect: false,
       transports: ['websocket'],
       query: {
