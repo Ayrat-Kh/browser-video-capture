@@ -14,16 +14,11 @@ import {
   VideoCaptureImageEventData,
 } from './video-capture.listener.events';
 
-interface Encoder {
-  ffmpegProc: ChildProcess;
-  size: Size;
-}
-
 @Injectable()
 export class VideoCaptureService {
   private readonly logger = new Logger(VideoCaptureService.name);
 
-  readonly #encoders = new Map<string, Encoder>();
+  readonly #encoders = new Map<string, ChildProcess>();
   readonly #upcomingLatestImages = new Map<string, Buffer>();
 
   constructor(private readonly eventEmitter: EventEmitter2) {}
@@ -37,12 +32,13 @@ export class VideoCaptureService {
     },
   ): Promise<void> {
     const encoder = this.#encoders.get(identifierToString(data));
-    encoder.ffmpegProc?.stdin?.write(data.chunk);
+    encoder.stdin?.write(data.chunk);
     return Promise.resolve();
   }
 
   public initEncoder(
-    identifier: ChunkIdentifier & Size,
+    identifier: ChunkIdentifier,
+    size: Size,
   ): Promise<ChildProcess> {
     this.resetEncoder(identifier);
 
@@ -82,20 +78,17 @@ export class VideoCaptureService {
     });
 
     ffmpegProcess.on('close', (error: Buffer) => {
-      this.logger.error(
+      this.logger.debug(
         `[${identifierToString(identifier)}] closed encoder:`,
         error?.toString(),
       );
     });
 
     ffmpegProcess.stdio[3].on('data', (image: Buffer) => {
-      this.#sendImage(identifier, image);
+      this.#sendImage(identifier, image, size);
     });
 
-    this.#encoders.set(identifierToString(identifier), {
-      ffmpegProc: ffmpegProcess,
-      size: identifier,
-    });
+    this.#encoders.set(identifierToString(identifier), ffmpegProcess);
 
     return Promise.resolve(ffmpegProcess);
   }
@@ -110,24 +103,28 @@ export class VideoCaptureService {
     if (this.#encoders.has(id)) {
       const ffmpegProcess = this.#encoders.get(id);
       this.#encoders.delete(id);
-      ffmpegProcess?.ffmpegProc?.kill();
+      ffmpegProcess?.kill();
     }
   }
 
-  async #sendImage(identifier: ChunkIdentifier, chunk: Buffer) {
+  async #sendImage(
+    identifier: ChunkIdentifier,
+    imageChunk: Buffer,
+    size: Size,
+  ) {
     const BUFFER_SIZE = 65_536; // ffmpeg max buf size id 65_536 if we go above we should concat several sections
 
     const id = identifierToString(identifier);
     let latestBuffer = this.#upcomingLatestImages.get(id);
     if (latestBuffer?.byteLength % BUFFER_SIZE === 0) {
-      latestBuffer = Buffer.concat([latestBuffer, chunk]);
+      latestBuffer = Buffer.concat([latestBuffer, imageChunk]);
     } else {
-      latestBuffer = chunk;
+      latestBuffer = imageChunk;
     }
 
     this.#upcomingLatestImages.set(id, latestBuffer);
 
-    if (chunk.byteLength === BUFFER_SIZE) {
+    if (imageChunk.byteLength === BUFFER_SIZE || !this.#encoders.get(id)) {
       return;
     }
 
@@ -135,11 +132,7 @@ export class VideoCaptureService {
 
     this.eventEmitter.emit(
       VideoCaptureEvents.ImageCapture,
-      new VideoCaptureImageEventData(
-        latestBuffer,
-        identifier,
-        this.#encoders.get(id).size,
-      ),
+      new VideoCaptureImageEventData(latestBuffer, identifier, size),
     );
   }
 }

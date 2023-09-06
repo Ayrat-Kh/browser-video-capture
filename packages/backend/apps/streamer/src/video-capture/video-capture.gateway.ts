@@ -9,6 +9,8 @@ import { Logger } from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 
 import {
+  type ChunkIdentifier,
+  type Size,
   VIDEO_WS_EVENTS,
   WS_NS,
   WebSocketConnectParams,
@@ -34,7 +36,12 @@ export class VideoCaptureGateway
       client.handshake.query,
     );
 
-    this.videoCaptureService.resetEncoder(query);
+    const id: ChunkIdentifier = {
+      organizationId: query.organizationId,
+      sensorId: query.sensorId,
+    };
+
+    this.videoCaptureService.resetEncoder(id);
   }
 
   public async handleConnection(client: Socket) {
@@ -45,7 +52,17 @@ export class VideoCaptureGateway
 
     client.join(identifierToString(query));
 
-    await this.videoCaptureService.initEncoder(query);
+    const id: ChunkIdentifier = {
+      organizationId: query.organizationId,
+      sensorId: query.sensorId,
+    };
+
+    const size: Size = {
+      height: query.height,
+      width: query.width,
+    };
+
+    await this.videoCaptureService.initEncoder(id, size);
   }
 
   @SubscribeMessage(VIDEO_WS_EVENTS.UPLOAD_CHUNK)
