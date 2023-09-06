@@ -101,3 +101,49 @@ Push docker image by running the command below.
 ```
 make push-visualizer
 ```
+
+## Streamer architecture
+
+This is a high level view of the components
+
+streamer (frontend)
+
+```
+getUserMedia -> MediaREcorder (video stream) -> video-stream (output)
+```
+
+```
+ |
+ |      send video-stream over socket.io
+\ /
+```
+
+streamer (backend)
+
+```
+video-stream (input) -> ffmpeg -> image (output)
+```
+
+```
+ |
+ |      send over image socket.io
+\ /
+```
+
+visualizer (backend)
+
+```
+image (input) -> restream to visualizer -> image (output)
+```
+
+```
+ |
+ |      send over image socket.io
+\ /
+```
+
+visualizer (frontend)
+
+```
+image (input) -> draw in canvas
+```
