@@ -1,4 +1,10 @@
-## How is streamer backend converting video stream to image.
+#### Environment variables:
+
+`APP_PORT` - Optional, default 3001
+
+`IMAGE_SOCKET_SERVER_URL` - URL to visualizer backend
+
+#### How is streamer backend converting video stream to image.
 
 In
 `./packages/backend/apps/streamer/src/video-capture/video-capture.service.ts, ` `initEncoder` method we initialize ffmpeg.

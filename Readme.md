@@ -12,14 +12,21 @@ yarn
 
 # Run all tests
 
+Dependencies should be installed
+
 ```
 yarn test
 ```
 
 ## Run docker-compose
 
+Please keep in mind that `docker-compose` is designed for the localhost. For other environments build args and env variables should be configured.
+
+Frontend - see [here](./packages/frontend//Readme.md).
+
+Streamer backend - see [here](./packages/backend/Readme.md).
+
 ```
-yarn
 docker-compose up
 ```
 
@@ -27,7 +34,7 @@ docker-compose up
 
 #### Setup
 
-Run the command below. Update env vars if needed. By default .env is configured to localhost.
+Run the command below. Update env vars if needed. By default `.env` is configured to localhost.
 
 ```
 cp ./packages/frontend/.env.example ./packages/frontend/.env
