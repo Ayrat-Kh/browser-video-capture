@@ -70,12 +70,12 @@ export class VideoCaptureService {
       { stdio: ['pipe', 'pipe', null, 'pipe', 'pipe'] },
     );
 
-    ffmpegProcess.stderr.on('data', (error: Buffer) => {
-      this.logger.debug(
-        `[${identifierToString(identifier)}] [stderr-info]:`,
-        error?.toString(),
-      );
-    });
+    // ffmpegProcess.stderr.on('data', (error: Buffer) => {
+    //   this.logger.debug(
+    //     `[${identifierToString(identifier)}] [std(deb|err)-info]:`,
+    //     error?.toString(),
+    //   );
+    // });
 
     ffmpegProcess.on('close', (error: Buffer) => {
       this.logger.debug(
@@ -127,8 +127,6 @@ export class VideoCaptureService {
     if (imageChunk.byteLength === BUFFER_SIZE) {
       return;
     }
-
-    console.log('imageChunk', latestBuffer.byteLength);
 
     this.#upcomingLatestImages.delete(id);
 

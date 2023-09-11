@@ -10,6 +10,12 @@
 yarn
 ```
 
+# Run all tests
+
+```
+yarn test
+```
+
 ## Frontend
 
 #### Setup

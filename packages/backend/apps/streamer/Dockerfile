@@ -24,10 +24,6 @@ RUN yarn build:backend
 # Runtime (production) layer
 FROM node:16-alpine as production
 
-ARG IMAGE_SOCKET_SERVER_URL
-ENV IMAGE_SOCKET_SERVER_URL=$IMAGE_SOCKET_SERVER_URL
-
-ENV APP_PORT=3001
 
 WORKDIR /app
 
@@ -39,6 +35,11 @@ COPY ./yarn.lock ./
 
 # Install runtime dependecies (without dev/test dependecies)
 RUN yarn --production=true
+
+ARG IMAGE_SOCKET_SERVER_URL
+ENV IMAGE_SOCKET_SERVER_URL=$IMAGE_SOCKET_SERVER_URL
+
+ENV APP_PORT=3001
 
 # Copy production build
 COPY --from=development /app/packages/backend/dist/ ./dist/

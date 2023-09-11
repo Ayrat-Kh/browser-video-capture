@@ -20,12 +20,6 @@ const successPingResult = {
   isSuccess: true,
 };
 
-vi.stubGlobal('screen', {
-  orientation: {
-    type: 'landscape-primary',
-  },
-});
-
 // mock camera services
 vi.stubGlobal('navigator', {
   mediaDevices: {
@@ -51,8 +45,6 @@ vi.stubGlobal(
     }
   },
 );
-
-vi.stubGlobal('matchMedia', vi.fn());
 
 // mock ping request
 const fetchFn = vi.fn(() => ({

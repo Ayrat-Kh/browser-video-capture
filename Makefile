@@ -39,7 +39,7 @@ push-streamer:
 # STREAMER
 # Envs from .env for streamer:
 # 	- VISUALIZER_DOCKER_REGISTRY
-export VISUALIZER_DOCKER_ARTEFACT_TAG=webcam-streamer-backend
+export VISUALIZER_DOCKER_ARTEFACT_TAG=webcam-visualizer-backend
 
 build-visualizer:
 	docker build \
@@ -68,7 +68,7 @@ deploy-streamer:
 deploy-visualizer:
 	kubectl -n webcam delete pods $$(kubectl -n webcam get pods | grep visualizer-backend-deployment | awk '{ print $$1 }')
 
-deploy-all: update-frontend update-streamer update-visualizer
+deploy-all: deploy-frontend deploy-streamer deploy-visualizer
 
 #all
 build-push-deploy-frontend: build-push-frontend deploy-frontend
@@ -79,3 +79,6 @@ build-push-deploy-all: build-push-deploy-frontend build-push-deploy-streamer bui
 #logs
 logs-streamer:
 	kubectl -n webcam logs $$(kubectl -n webcam get pods | grep streamer-backend-deployment | awk '{ print $$1 }')
+
+logs-visualizer:
+	kubectl -n webcam logs $$(kubectl -n webcam get pods | grep visualizer-backend-deployment | awk '{ print $$1 }')

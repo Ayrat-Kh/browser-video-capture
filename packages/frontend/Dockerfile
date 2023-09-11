@@ -1,10 +1,6 @@
 # Building layer
 FROM node:16-alpine as development
 
-ARG VITE_STREAMER_APP_URL
-ARG VITE_STREAMER_SOCKET_URL
-ARG VITE_PLAYER_SOCKET_URL
-
 WORKDIR /app
 
 # Copy configuration files
@@ -17,6 +13,10 @@ COPY ./yarn.lock ./
 
 # Install dependencies
 RUN yarn
+
+ARG VITE_STREAMER_APP_URL
+ARG VITE_STREAMER_SOCKET_URL
+ARG VITE_PLAYER_SOCKET_URL
 
 COPY ./packages/frontend-api/tsconfig*.json ./packages/frontend-api/
 COPY ./packages/frontend/tsconfig*.json ./packages/frontend/

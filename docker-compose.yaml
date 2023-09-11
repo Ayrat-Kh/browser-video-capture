@@ -1,0 +1,31 @@
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: ./packages/frontend/Dockerfile
+    #   tags:
+    #     - "webcam-frontend"
+      args:
+        - VITE_STREAMER_APP_URL=http://127.0.0.1:3001
+        - VITE_STREAMER_SOCKET_URL=ws://127.0.0.1:3001
+        - VITE_PLAYER_SOCKET_URL=ws://127.0.0.1:3002
+    ports:
+      - "3000:3000"
+
+  streamer:
+    build:
+      context: .
+      dockerfile: ./packages/backend/apps/streamer/Dockerfile
+    #   tags:
+    #     - local-webcam-streamer-backend
+    ports:
+      - "3001:3001"
+    environment:
+      - IMAGE_SOCKET_SERVER_URL=ws://visualizer:3001
+
+  visualizer:
+    build:
+      context: .
+      dockerfile: ./packages/backend/apps/visualizer/Dockerfile
+    ports:
+      - "3002:3001"

@@ -76,9 +76,11 @@ export class CameraRecorderService {
   }
 
   public static getScreenSize(): Size {
-    const orientation = matchMedia?.('(orientation: portrait)');
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(
+      navigator?.userAgent ?? '',
+    );
 
-    if (orientation?.matches) {
+    if (isMobile) {
       return {
         width: CAMERA_RESOLUTION.height,
         height: CAMERA_RESOLUTION.width,
