@@ -18,6 +18,7 @@
     "build:backend": "yarn workspace @webcam/backend build",
     "---- streamer-player ----": "",
     "dev:visualizer": "yarn workspace @webcam/backend start:visualizer:dev",
+    "---- Run all tests ----": "",
     "test": "yarn workspace @webcam/backend test:streamer && yarn workspace @webcam/backend test:visualizer && yarn workspace @webcam/frontend-api test"
   }
 }

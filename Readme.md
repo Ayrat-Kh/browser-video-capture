@@ -157,3 +157,39 @@ image (input) -> draw in canvas
 ## Streamer and visualizer info
 
 See readme [here](./packages/frontend-api/Readme.md)
+
+## Project entry points
+
+## Core parts
+
+#### Streamer backend
+
+[entry point: main](./packages/backend/apps/streamer/src/main.ts) - streamer entry point.
+
+[video-capture.gateway](./packages/backend/apps/streamer/src/video-capture/video-capture.gateway.ts) - this video stream capture web socket gateway.
+
+[video-capture.gateway](./packages/backend/apps/streamer/src/video-capture/video-capture.service.ts) - this service for converting video stream to set of images using ffmpeg and emitting the images to [video-capture.listener](./packages/backend/apps/streamer/src/video-capture/video-capture.listener.ts).
+
+[ImageServiceSocketProvider](./packages/backend/apps/streamer/src/providers/ImageServiceSocketProvider.ts) - web socket connector between streamer and visualizer. Can be dropped when won't be used as well as [ImageServiceSocketProviderStrategy](./packages/backend/apps/streamer/src/providers/ImageServiceSocketProviderStrategy.ts).
+
+#### Visualizer backend
+
+[entry point: main](./packages/backend/apps/visualizer/src/main.ts) - visualizer entry point.
+
+[entry point: main](./packages/backend/apps/visualizer/src/image-streamer-provider/image-streamer-provider.gateway.ts) - this web socket gateway for receiving images from streamer backend and broadcasting to [visualizer.gateway](./packages/backend/apps/visualizer/src/visualizer/visualizer.gateway.ts) that will notify all connected frontend users.
+
+#### Frontend API
+
+[camera-recorder-service](./packages/frontend-api/src/camera-recorder-service.ts) - this API can be used for connecting FE with streamer backend
+
+[camera-stream-service](./packages/frontend-api/src/camera-stream-service.ts) - this API can be used for connecting FE with visualizer backend
+
+#### Frontend - demo app
+
+The app only is used for demo purposes. No helpful code is placed in the package.
+
+[main](./packages/frontend/src/main.tsx) - This file is an entry point for the react app.
+
+[Example of usage: camera-recorder-service](./packages/frontend/src/components/Streamer/Streamer.tsx)
+
+[Example of usage: camera-stream-service](./packages/frontend/src/components/ImagePlayer/ImagePlayer.tsx)
