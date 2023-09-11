@@ -52,13 +52,14 @@ export class VideoCaptureService {
       ffmpegPath as unknown as string,
       [
         ...['-ignore_unknown'],
-        ...['-probesize', '5M'],
+        ...['-probesize', '1M'],
         '-an',
         ...['-i', '-'],
         // image
         ...['-tune', 'zerolatency'],
 
-        ...['-r', '20'],
+        ...['-framerate', '20'],
+        ...['-vf', 'fps=20'],
         ...['-f', 'image2pipe'],
         ...['-c:v', 'mjpeg'],
         ...['-b:v', `${SIZE}M`],
@@ -70,12 +71,12 @@ export class VideoCaptureService {
       { stdio: ['pipe', 'pipe', null, 'pipe', 'pipe'] },
     );
 
-    // ffmpegProcess.stderr.on('data', (error: Buffer) => {
-    //   this.logger.debug(
-    //     `[${identifierToString(identifier)}] [std(deb|err)-info]:`,
-    //     error?.toString(),
-    //   );
-    // });
+    ffmpegProcess.stderr.on('data', (error: Buffer) => {
+      this.logger.debug(
+        `[${identifierToString(identifier)}] [std(deb|err)-info]:`,
+        error?.toString(),
+      );
+    });
 
     ffmpegProcess.on('close', (error: Buffer) => {
       this.logger.debug(

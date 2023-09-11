@@ -48,7 +48,7 @@ build-visualizer:
 		.
 
 push-visualizer:
-	docker tag ${STREAMER_DOCKER_ARTEFACT_TAG} ${VISUALIZER_DOCKER_REGISTRY} && docker push ${VISUALIZER_DOCKER_REGISTRY}
+	docker tag ${VISUALIZER_DOCKER_ARTEFACT_TAG} ${VISUALIZER_DOCKER_REGISTRY} && docker push ${VISUALIZER_DOCKER_REGISTRY}
 
 build-push-frontend: build-frontend push-frontend
 build-push-streamer: build-streamer push-streamer
@@ -82,3 +82,7 @@ logs-streamer:
 
 logs-visualizer:
 	kubectl -n webcam logs $$(kubectl -n webcam get pods | grep visualizer-backend-deployment | awk '{ print $$1 }')
+
+# resource
+top-streamer:
+	kubectl -n webcam top pod $$(kubectl -n webcam get pods | grep streamer-backend-deployment | awk '{ print $$1 }') --containers
