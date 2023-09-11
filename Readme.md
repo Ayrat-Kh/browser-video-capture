@@ -16,6 +16,13 @@ yarn
 yarn test
 ```
 
+## Run docker-compose
+
+```
+yarn
+docker-compose up
+```
+
 ## Frontend
 
 #### Setup
