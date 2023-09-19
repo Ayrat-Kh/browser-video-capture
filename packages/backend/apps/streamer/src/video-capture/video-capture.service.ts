@@ -19,7 +19,7 @@ export class VideoCaptureService {
   private readonly logger = new Logger(VideoCaptureService.name);
 
   readonly #encoders = new Map<string, ChildProcess>();
-  readonly #upcomingLatestImages = new Map<string, Buffer>();
+  readonly #upcomingLatestImages = new Map<string, Buffer[]>();
 
   constructor(private readonly eventEmitter: EventEmitter2) {}
 
@@ -46,7 +46,7 @@ export class VideoCaptureService {
       `Org id: ${identifier.organizationId} SensorId: ${identifier.sensorId}: init encoder`,
     );
 
-    const SIZE = 5;
+    const SIZE = 10;
 
     const ffmpegProcess = spawn(
       ffmpegPath as unknown as string,
@@ -58,9 +58,9 @@ export class VideoCaptureService {
         ...['-b:v', `${SIZE}M`],
         ...['-maxrate', `${SIZE}M`],
         ...['-bufsize', `${2 * SIZE}M`],
-        ...['-preset', 'veryfast'],
         ...['-vf', 'fps=20'],
         ...['-c:v', 'mjpeg'],
+        ...['-preset', 'veryfast'],
         ...['-f', 'image2pipe'],
         'pipe:3',
       ],
@@ -112,14 +112,16 @@ export class VideoCaptureService {
     const BUFFER_SIZE = 65_536; // ffmpeg max buf size id 65_536 if we go above we should concat several sections
 
     const id = identifierToString(identifier);
-    let latestBuffer = this.#upcomingLatestImages.get(id);
-    if (latestBuffer?.byteLength % BUFFER_SIZE === 0) {
-      latestBuffer = Buffer.concat([latestBuffer, imageChunk]);
+
+    let buffers = this.#upcomingLatestImages.get(id);
+
+    if (buffers) {
+      buffers.push(imageChunk);
     } else {
-      latestBuffer = imageChunk;
+      buffers = [imageChunk];
     }
 
-    this.#upcomingLatestImages.set(id, latestBuffer);
+    this.#upcomingLatestImages.set(id, buffers);
 
     if (imageChunk.byteLength === BUFFER_SIZE) {
       return;
@@ -131,7 +133,7 @@ export class VideoCaptureService {
 
     this.eventEmitter.emit(
       VideoCaptureEvents.ImageCapture,
-      new VideoCaptureImageEventData(latestBuffer, identifier, size),
+      new VideoCaptureImageEventData(Buffer.concat(buffers), identifier, size),
     );
   }
 }
