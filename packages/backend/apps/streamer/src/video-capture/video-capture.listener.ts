@@ -21,8 +21,11 @@ export class VideoCaptureListener {
     size,
   }: VideoCaptureImageEventData) {
     this.imageServiceSocketProvider.socket.sendBuffer = [];
-    this.imageServiceSocketProvider.socket.volatile
-      .compress(true)
-      .emit(VIDEO_WS_EVENTS.IMAGE_PROVIDER, id, image, size);
+    this.imageServiceSocketProvider.socket.volatile.emit(
+      VIDEO_WS_EVENTS.IMAGE_PROVIDER,
+      id,
+      image,
+      size,
+    );
   }
 }

@@ -46,26 +46,22 @@ export class VideoCaptureService {
       `Org id: ${identifier.organizationId} SensorId: ${identifier.sensorId}: init encoder`,
     );
 
-    const SIZE = 8;
+    const SIZE = 5;
 
     const ffmpegProcess = spawn(
       ffmpegPath as unknown as string,
       [
         ...['-ignore_unknown'],
         ...['-probesize', '1M'],
-        '-an',
         ...['-i', '-'],
-        // image
-        ...['-tune', 'zerolatency'],
-
-        ...['-framerate', '20'],
-        ...['-vf', 'fps=20'],
-        ...['-f', 'image2pipe'],
-        ...['-c:v', 'mjpeg'],
+        '-an',
         ...['-b:v', `${SIZE}M`],
         ...['-maxrate', `${SIZE}M`],
         ...['-bufsize', `${2 * SIZE}M`],
-
+        ...['-preset', 'veryfast'],
+        ...['-vf', 'fps=20'],
+        ...['-c:v', 'mjpeg'],
+        ...['-f', 'image2pipe'],
         'pipe:3',
       ],
       { stdio: ['pipe', 'pipe', null, 'pipe', 'pipe'] },
@@ -128,6 +124,8 @@ export class VideoCaptureService {
     if (imageChunk.byteLength === BUFFER_SIZE) {
       return;
     }
+
+    // this.logger.debug(`[${id}]: buffer size: ${latestBuffer.byteLength}`);
 
     this.#upcomingLatestImages.delete(id);
 

@@ -129,7 +129,6 @@ export class CameraRecorderService {
 
     this.#recorder = new MediaRecorder(this.#stream, {
       mimeType: CameraRecorderService.getSupportedMimeType(),
-      videoBitsPerSecond: 8_388_608, // 8mbit
     });
 
     this.#socket?.on('disconnect', async () => {

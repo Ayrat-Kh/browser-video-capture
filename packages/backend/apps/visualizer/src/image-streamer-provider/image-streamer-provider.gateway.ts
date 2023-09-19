@@ -27,7 +27,6 @@ export class ImageStreamerProviderGateway {
 
     this.visualizerGateway.server
       .to(identifier)
-      .compress(true)
       .emit(VIDEO_WS_EVENTS.IMAGE, image, size);
 
     return true;
